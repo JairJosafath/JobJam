@@ -49,16 +49,6 @@ export class AuthResource extends Construct {
 					integrationResponses: [
 						{
 							statusCode: "200",
-							responseTemplates: {
-								"application/json": JSON.stringify({
-									accessToken:
-										"$util.escapeJavaScript($input.path('$.AuthenticationResult.AccessToken'))",
-									idToken:
-										"$util.escapeJavaScript($input.path('$.AuthenticationResult.IdToken'))",
-									refreshToken:
-										"$util.escapeJavaScript($input.path('$.AuthenticationResult.RefreshToken'))",
-								}),
-							},
 						},
 						{
 							selectionPattern: "4\\d{2}",
@@ -108,6 +98,152 @@ export class AuthResource extends Construct {
 									message: "User confirmed",
 								}),
 							},
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+					],
+				},
+			})
+		);
+
+		const resetPasswordResource = api.root.addResource("reset-password");
+		resetPasswordResource.addMethod(
+			"POST",
+			new AwsIntegration({
+				service: "cognito-idp",
+				action: "ForgotPassword",
+				integrationHttpMethod: "POST",
+				options: {
+					credentialsRole,
+					requestTemplates: {
+						"application/json": JSON.stringify({
+							ClientId: clientId,
+							Username: "$input.path('$.username')",
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "Password reset code sent",
+								}),
+							},
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+					],
+				},
+			})
+		);
+
+		const confirmResetResource = api.root.addResource("confirm-reset");
+		confirmResetResource.addMethod(
+			"POST",
+			new AwsIntegration({
+				service: "cognito-idp",
+				action: "ConfirmForgotPassword",
+				integrationHttpMethod: "POST",
+				options: {
+					credentialsRole,
+					requestTemplates: {
+						"application/json": JSON.stringify({
+							ClientId: clientId,
+							Username: "$input.path('$.username')",
+							ConfirmationCode: "$input.path('$.confirmationCode')",
+							Password: "$input.path('$.password')",
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "Password reset",
+								}),
+							},
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+					],
+				},
+			})
+		);
+
+		const authChallengeResource = api.root.addResource("auth-challenge");
+		authChallengeResource.addMethod(
+			"POST",
+			new AwsIntegration({
+				service: "cognito-idp",
+				action: "RespondToAuthChallenge",
+				integrationHttpMethod: "POST",
+				options: {
+					credentialsRole,
+					requestTemplates: {
+						"application/json": JSON.stringify({
+							ClientId: clientId,
+							ChallengeName: "$input.path('$.challengeName')",
+							ChallengeResponses: {
+								USERNAME: "$input.path('$.username')",
+								NEW_PASSWORD: "$input.path('$.newPassword')",
+							},
+							Session: "$input.path('$.session')",
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
 						},
 						{
 							selectionPattern: "4\\d{2}",
