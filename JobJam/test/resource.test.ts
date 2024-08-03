@@ -1,3 +1,10 @@
+import { config } from "dotenv";
+config();
+const endpoint = process.env.MOCK_ENDPOINT_URL;
 test("sends GET request to mock endpoint", () => {
-	expect("hello_world").toBe("hello_world");
+	async function testMockEndpoint() {
+		const res = await fetch(endpoint || "");
+		expect(res.status).toBe(200);
+	}
+	testMockEndpoint();
 });
