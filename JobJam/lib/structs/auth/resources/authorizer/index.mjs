@@ -30,7 +30,11 @@ export async function handler(event) {
 				body: JSON.stringify({ message: "Email not verified" }),
 			};
 		}
-		if (resource === "interviewer" && method === "POST" && role !== "admin") {
+		if (
+			(resource === "interviewer" || resource === "hiring-manager") &&
+			method === "POST" &&
+			role !== "admin"
+		) {
 			return {
 				statusCode: 401,
 				body: JSON.stringify({ message: "Unauthorized" }),

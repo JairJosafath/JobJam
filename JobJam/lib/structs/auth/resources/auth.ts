@@ -289,6 +289,7 @@ export class AuthResource extends Construct {
 								{
 									Name: "email",
 									Value: "$input.path('$.email')",
+									"custom:role": "applicant",
 								},
 							],
 						}),

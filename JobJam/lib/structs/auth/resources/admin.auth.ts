@@ -55,6 +55,7 @@ export class AuthAdminResource extends Construct {
 						"application/json": JSON.stringify({
 							UserPoolId: userPool.userPoolId,
 							Username: "$input.path('$.username')",
+							MessageAction: "SUPPRESS",
 							TemporaryPassword: "$input.path('$.password')",
 							UserAttributes: [
 								{
@@ -79,6 +80,71 @@ export class AuthAdminResource extends Construct {
 							responseTemplates: {
 								"application/json": JSON.stringify({
 									message: "Interviewer created",
+								}),
+							},
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+					],
+				},
+			}),
+			{ authorizer }
+		);
+
+		const hiringManagerResource = api.root.addResource("hiring-manager");
+		hiringManagerResource.addMethod(
+			"POST",
+			new AwsIntegration({
+				service: "cognito-idp",
+				action: "AdminCreateUser",
+				integrationHttpMethod: "POST",
+				options: {
+					credentialsRole,
+					requestTemplates: {
+						"application/json": JSON.stringify({
+							UserPoolId: userPool.userPoolId,
+							Username: "$input.path('$.username')",
+							MessageAction: "SUPPRESS",
+							TemporaryPassword: "$input.path('$.password')",
+							UserAttributes: [
+								{
+									Name: "email",
+									Value: "$input.path('$.email')",
+								},
+								{
+									Name: "email_verified",
+									Value: "true",
+								},
+								{
+									Name: "custom:role",
+									Value: "hiring-manager",
+								},
+							],
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "Hiring Manager created",
 								}),
 							},
 						},
