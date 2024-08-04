@@ -267,5 +267,123 @@ export class AuthResource extends Construct {
 				},
 			})
 		);
+
+		const interviewerResource = api.root.addResource("interviewer");
+		interviewerResource.addMethod(
+			"POST",
+			new AwsIntegration({
+				service: "cognito-idp",
+				action: "AdminCreateUser",
+				integrationHttpMethod: "POST",
+				options: {
+					credentialsRole,
+					requestTemplates: {
+						"application/json": JSON.stringify({
+							UserPoolId: userPool.userPoolId,
+							Username: "$input.path('$.username')",
+							TemporaryPassword: "$input.path('$.password')",
+							UserAttributes: [
+								{
+									Name: "email",
+									Value: "$input.path('$.email')",
+								},
+								{
+									Name: "email_verified",
+									Value: "true",
+								},
+								{
+									Name: "custom:role",
+									Value: "interviewer",
+								},
+							],
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "Interviewer created",
+								}),
+							},
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+					],
+				},
+			})
+		);
+
+		const signupResource = api.root.addResource("signup");
+		signupResource.addMethod(
+			"POST",
+			new AwsIntegration({
+				service: "cognito-idp",
+				action: "SignUp",
+				integrationHttpMethod: "POST",
+				options: {
+					credentialsRole,
+					requestTemplates: {
+						"application/json": JSON.stringify({
+							ClientId: clientId,
+							Username: "$input.path('$.username')",
+							Password: "$input.path('$.password')",
+							UserAttributes: [
+								{
+									Name: "email",
+									Value: "$input.path('$.email')",
+								},
+							],
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "User signed up",
+								}),
+							},
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									message: "$input.path('$.message')",
+								}),
+							},
+						},
+					],
+				},
+			})
+		);
 	}
 }
