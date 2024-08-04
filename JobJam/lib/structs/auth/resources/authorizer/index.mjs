@@ -1,46 +1,59 @@
-// custom lambda request authorizer
+import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { stat } from "fs";
 
-export default async function handler(event) {
-	const token = event.authorizationToken;
+const userPoolId = process.env.COGNITO_USER_POOL_ID || "eu-north-1_goxAp24qq";
+const clientId = process.env.COGNITO_CLIENT_ID || "ncaincd0t7grg4jh660s6ph27";
+
+export async function handler(event) {
+	const jwtVerifier = new CognitoJwtVerifier({
+		userPoolId,
+		clientId,
+		tokenUse: "id",
+	});
+
+	const token = event.headers.Authorization;
 	const methodArn = event.methodArn;
-	const method = event.httpMethod;
-	const role = event.requestContext.authorizer.claims["custom:role"];
-	const userId = event.requestContext.authorizer.claims["sub"];
-	const email = event.requestContext.authorizer.claims["email"];
-	const confirmed = event.requestContext.authorizer.claims["email_verified"];
 
-	console.log({ token, methodArn, method, role, userId, email });
+	try {
+		const claims = await jwtVerifier.verify(token);
+		const role = claims["custom:role"];
+		const emailVerified = claims.email_verified;
+		const principalId = claims.sub;
 
-	if (!token || !confirmed) {
+		console.log("Claims", claims);
+
+		if (!emailVerified) {
+			return {
+				statusCode: 401,
+				body: JSON.stringify({ message: "Email not verified" }),
+			};
+		}
+		if (role === "admin") {
+			console.log("Admin access granted");
+			return {
+				principalId: principalId,
+				policyDocument: {
+					Version: "2012-10-17",
+					Statement: [
+						{
+							Action: "execute-api:Invoke",
+							Effect: "Allow",
+							Resource: methodArn,
+						},
+					],
+				},
+			};
+		}
+
 		return {
 			statusCode: 401,
 			body: JSON.stringify({ message: "Unauthorized" }),
 		};
-	} else if (role === "admin") {
-		return generatePolicy(userId, "Allow", methodArn);
-	} else if (role === "interviewer") {
-		return generatePolicy(userId, "Allow", methodArn);
-
+	} catch (error) {
+		console.error(error);
 		return {
-			statusCode: 403,
-			body: JSON.stringify({ message: "Forbidden" }),
+			statusCode: 401,
+			body: JSON.stringify({ message: "Unauthorized" }),
 		};
 	}
-}
-
-function generatePolicy(principalId, effect, resource) {
-	const authResponse = {};
-	authResponse.principalId = principalId;
-	if (effect && resource) {
-		const policyDocument = {};
-		policyDocument.Version = "2012-10-17";
-		policyDocument.Statement = [];
-		const statementOne = {};
-		statementOne.Action = "execute-api:Invoke";
-		statementOne.Effect = effect;
-		statementOne.Resource = resource;
-		policyDocument.Statement[0] = statementOne;
-		authResponse.policyDocument = policyDocument;
-	}
-	return authResponse;
 }

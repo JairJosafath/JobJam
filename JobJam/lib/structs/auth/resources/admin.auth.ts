@@ -7,8 +7,9 @@ import {
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
-import { AssetCode, Runtime, Function } from "aws-cdk-lib/aws-lambda";
+import { AssetCode, Runtime, Function, Code } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
+import path = require("path");
 
 export class AuthAdminResource extends Construct {
 	constructor(
@@ -35,7 +36,7 @@ export class AuthAdminResource extends Construct {
 				handler: new Function(this, "AdminANDInterviewerAuthorizerFunction", {
 					runtime: Runtime.NODEJS_20_X,
 					handler: "index.handler",
-					code: AssetCode.fromAsset("authorizer"),
+					code: Code.fromAsset(path.join(__dirname, "authorizer")),
 				}),
 				identitySources: ["method.request.header.Authorization"],
 			}
@@ -104,16 +105,14 @@ export class AuthAdminResource extends Construct {
 			})
 		);
 
-		const mockResource = api.root.addResource("interviewer/mock");
+		const mockResource = interviewerResource.addResource("mock");
 		// test lambda authorizer with mock integration
 		mockResource.addMethod(
 			"GET",
 			new MockIntegration({
 				passthroughBehavior: PassthroughBehavior.NEVER,
 				requestTemplates: {
-					"application/json": JSON.stringify({
-						statusCode: 200,
-					}),
+					"application/json": JSON.stringify({}),
 				},
 				integrationResponses: [
 					{
@@ -128,18 +127,14 @@ export class AuthAdminResource extends Construct {
 						statusCode: "400",
 						selectionPattern: "4\\d{2}",
 						responseTemplates: {
-							"application/json": JSON.stringify({
-								message: "$input.path('$.message')",
-							}),
+							"application/json": JSON.stringify({}),
 						},
 					},
 					{
 						statusCode: "500",
 						selectionPattern: "5\\d{2}",
 						responseTemplates: {
-							"application/json": JSON.stringify({
-								message: "$input.path('$.message')",
-							}),
+							"application/json": JSON.stringify({}),
 						},
 					},
 				],

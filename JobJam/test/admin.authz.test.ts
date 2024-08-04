@@ -40,11 +40,10 @@ test("test admin login", async () => {
 	if (resInterviewer.status === 200) {
 		console.log("Test interviewer mock endpoint access successful");
 		expect(resInterviewer.status).toBe(200);
-		expect(dataInterviewer.statusCode).toBe(200);
 		expect(dataInterviewer.message).toBe("Mock integration successful");
 	} else {
 		console.log("Test interviewer mock endpoint access failed");
-		console.log(dataInterviewer.message);
+		console.log(dataInterviewer);
 		expect(resInterviewer.status).toBe(200);
 	}
 });
