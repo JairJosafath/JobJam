@@ -128,7 +128,7 @@ test("login interviewer", async () => {
 		expect(res.status).toBe(200);
 	} else {
 		console.log("Test interviewer login failed");
-		console.log(await res.json());
+		console.log(data);
 		expect(res.status).toBe(200);
 	}
 

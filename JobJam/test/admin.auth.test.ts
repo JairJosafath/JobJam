@@ -4,13 +4,12 @@ import {
 	AdminDeleteUserCommand,
 	CognitoIdentityProviderClient,
 } from "@aws-sdk/client-cognito-identity-provider";
-import exp = require("constants");
 config();
 
 const client = new CognitoIdentityProviderClient({});
 const endpoint = process.env.MOCK_ENDPOINT_URL;
 const DELETE_USERS = false;
-const CREATE_USERS = true;
+const CREATE_USERS = false;
 
 if (CREATE_USERS) {
 	test("create admin user", async () => {

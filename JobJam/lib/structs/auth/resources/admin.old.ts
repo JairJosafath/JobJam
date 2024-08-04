@@ -24,14 +24,14 @@ export class AdminAuthResources extends Construct {
 			],
 		});
 
-		const authorizer = new RequestAuthorizer(this, "AdminAuthorizer", {
-			handler: new Function(this, "AdminANDInterviewerAuthorizerFunction", {
-				runtime: Runtime.NODEJS_20_X,
-				handler: "index.handler",
-				code: AssetCode.fromAsset("authorizer"),
-			}),
-			identitySources: ["method.request.header.Authorization"],
-		});
+		// const authorizer = new RequestAuthorizer(this, "AdminAuthorizer", {
+		// 	handler: new Function(this, "AdminANDInterviewerAuthorizerFunction", {
+		// 		runtime: Runtime.NODEJS_20_X,
+		// 		handler: "index.handler",
+		// 		code: AssetCode.fromAsset("authorizer"),
+		// 	}),
+		// 	identitySources: ["method.request.header.Authorization"],
+		// });
 
 		const interviewerResource = api.root.addResource("interviewer");
 		interviewerResource.addMethod(
@@ -91,7 +91,7 @@ export class AdminAuthResources extends Construct {
 				},
 			}),
 			{
-				authorizer: authorizer,
+				// authorizer: authorizer,
 			}
 		);
 

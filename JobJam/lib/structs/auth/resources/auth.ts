@@ -6,6 +6,7 @@ import {
 import { UserPool } from "aws-cdk-lib/aws-cognito";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
+import { AuthAdminResource } from "./admin.auth";
 
 export class AuthResource extends Construct {
 	constructor(
@@ -24,6 +25,8 @@ export class AuthResource extends Construct {
 				ManagedPolicy.fromAwsManagedPolicyName("AmazonCognitoPowerUser"),
 			],
 		});
+
+		new AuthAdminResource(scope, "AdminAuthResource", api, userPool, clientId);
 
 		const loginResource = api.root.addResource("login");
 		loginResource.addMethod(
@@ -244,69 +247,6 @@ export class AuthResource extends Construct {
 					integrationResponses: [
 						{
 							statusCode: "200",
-						},
-						{
-							selectionPattern: "4\\d{2}",
-							statusCode: "400",
-							responseTemplates: {
-								"application/json": JSON.stringify({
-									message: "$input.path('$.message')",
-								}),
-							},
-						},
-						{
-							selectionPattern: "5\\d{2}",
-							statusCode: "500",
-							responseTemplates: {
-								"application/json": JSON.stringify({
-									message: "$input.path('$.message')",
-								}),
-							},
-						},
-					],
-				},
-			})
-		);
-
-		const interviewerResource = api.root.addResource("interviewer");
-		interviewerResource.addMethod(
-			"POST",
-			new AwsIntegration({
-				service: "cognito-idp",
-				action: "AdminCreateUser",
-				integrationHttpMethod: "POST",
-				options: {
-					credentialsRole,
-					requestTemplates: {
-						"application/json": JSON.stringify({
-							UserPoolId: userPool.userPoolId,
-							Username: "$input.path('$.username')",
-							TemporaryPassword: "$input.path('$.password')",
-							UserAttributes: [
-								{
-									Name: "email",
-									Value: "$input.path('$.email')",
-								},
-								{
-									Name: "email_verified",
-									Value: "true",
-								},
-								{
-									Name: "custom:role",
-									Value: "interviewer",
-								},
-							],
-						}),
-					},
-					passthroughBehavior: PassthroughBehavior.NEVER,
-					integrationResponses: [
-						{
-							statusCode: "200",
-							responseTemplates: {
-								"application/json": JSON.stringify({
-									message: "Interviewer created",
-								}),
-							},
 						},
 						{
 							selectionPattern: "4\\d{2}",
