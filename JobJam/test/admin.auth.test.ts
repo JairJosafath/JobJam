@@ -4,6 +4,7 @@ import {
 	AdminDeleteUserCommand,
 	CognitoIdentityProviderClient,
 } from "@aws-sdk/client-cognito-identity-provider";
+import exp = require("constants");
 config();
 
 const client = new CognitoIdentityProviderClient({});
@@ -14,6 +15,7 @@ test("create admin user", async () => {
 		UserPoolId: process.env.USER_POOL_ID,
 		Username: "test-admin",
 		DesiredDeliveryMediums: ["EMAIL"],
+		MessageAction: "SUPPRESS",
 		TemporaryPassword: process.env.TEST_ADMIN_PASSWORD,
 		UserAttributes: [
 			{
@@ -37,7 +39,7 @@ test("create admin user", async () => {
 		expect({
 			status: res.$metadata.httpStatusCode,
 			username: res.User?.Username,
-		}).toBe({ status: 200, username: "test-admin" });
+		}).toStrictEqual({ status: 200, username: "test-admin" });
 	}
 });
 
@@ -84,25 +86,27 @@ test("admin first time login", async () => {
 		expect({
 			username: data.ChallengeParameters.USER_ID_FOR_SRP,
 			challengeName: data.ChallengeName,
-		}).toBe({
+		}).toStrictEqual({
 			username: "test-admin",
 			challengeName: "NEW_PASSWORD_REQUIRED",
 		});
 	} else {
 		console.log("Test admin password reset failed");
-		expect(1).toBe(2);
+		// reason of failure
+		console.log(await resChallenge.json());
+		expect(resChallenge.status).toBe(200);
 	}
 });
 
-// test("delete admin user", async () => {
-// 	// delete test-admin user
-// 	const command = new AdminDeleteUserCommand({
-// 		UserPoolId: process.env.USER_POOL_ID,
-// 		Username: "test-admin",
-// 	});
-// 	const resDelete = await client.send(command);
-// 	if (resDelete.$metadata.httpStatusCode === 200) {
-// 		console.log("Test admin deleted successfully");
-// 		expect(resDelete.$metadata.httpStatusCode).toBe(200);
-// 	}
-// });
+test("delete admin user", async () => {
+	// delete test-admin user
+	const command = new AdminDeleteUserCommand({
+		UserPoolId: process.env.USER_POOL_ID,
+		Username: "test-admin",
+	});
+	const resDelete = await client.send(command);
+	if (resDelete.$metadata.httpStatusCode === 200) {
+		console.log("Test admin deleted successfully");
+		expect(resDelete.$metadata.httpStatusCode).toBe(200);
+	}
+});
