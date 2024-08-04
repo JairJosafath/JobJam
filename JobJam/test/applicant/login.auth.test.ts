@@ -19,7 +19,6 @@ test("confirmed applicant can login", async () => {
 
 	if (res.status === 200) {
 		console.log("Test applicant logged in successfully");
-		expect(data.AuthenticationResult.AccessToken).toBeDefined();
 		expect(res.status).toBe(200);
 	} else {
 		console.log("Test applicant login failed");

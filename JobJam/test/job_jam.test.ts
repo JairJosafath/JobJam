@@ -14,3 +14,9 @@ test("SQS Queue Created", () => {
 	// 	VisibilityTimeout: 300,
 	// });
 });
+
+//
+
+/**
+ * test script: jest admin/initial.login.auth && jest admin/createInterviewer && jest admin/createHiringmanager && jest interviewer/initial.login.auth && jest hiring-manager/initial.login.auth && jest applicant/signup.auth
+ */

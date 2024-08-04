@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 config();
+const confirmationCode = "449482";
 
 test("applicant can confirm account", async () => {
 	const endpoint = process.env.MOCK_ENDPOINT_URL;
@@ -11,7 +12,7 @@ test("applicant can confirm account", async () => {
 		},
 		body: JSON.stringify({
 			username: "test-applicant",
-			confirmationCode: "006250",
+			confirmationCode, //this will change on every test where the user is created ... obviously
 		}),
 	});
 

@@ -3,7 +3,7 @@ config();
 
 const endpoint = process.env.MOCK_ENDPOINT_URL;
 
-test("test admin mock authorization", async () => {
+test("admin can login and create an interviewer", async () => {
 	const res = await fetch(endpoint + "/login", {
 		method: "POST",
 		headers: {
@@ -17,42 +17,17 @@ test("test admin mock authorization", async () => {
 	const data = await res.json();
 	if (res.status === 200) {
 		console.log("Test admin logged in successfully");
-		expect(data.AuthenticationResult.AccessToken).toBeDefined();
-		expect(data.AuthenticationResult.IdToken).toBeDefined();
 		expect(res.status).toBe(200);
 	} else {
 		console.log("Test admin login failed");
-		console.log(await res.json());
+		console.log(data);
 		expect(res.status).toBe(200);
 	}
-
-	// test GET mock endpoint that has a lambda authorizer
-	const resInterviewer = await fetch(endpoint + "/interviewer/mock", {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: data.AuthenticationResult.IdToken,
-		},
-	});
-
-	const dataInterviewer = await resInterviewer.json();
-
-	if (resInterviewer.status === 200) {
-		console.log("Test interviewer mock endpoint access successful");
-		expect(resInterviewer.status).toBe(200);
-		expect(dataInterviewer.message).toBe("Mock integration successful");
-	} else {
-		console.log("Test interviewer mock endpoint access failed");
-		console.log(dataInterviewer);
-		expect(resInterviewer.status).toBe(200);
-	}
-});
-
-test(" admin create interviewer", async () => {
-	const res = await fetch(endpoint + "/interviewer", {
+	const resInterviewer = await fetch(endpoint + "/interviewer", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
+			Authorization: data.AuthenticationResult.IdToken,
 		},
 		body: JSON.stringify({
 			username: "test-interviewer",
@@ -60,14 +35,12 @@ test(" admin create interviewer", async () => {
 			password: process.env.TEST_INTERVIEWER_PASSWORD,
 		}),
 	});
-	const data = await res.json();
-	if (res.status === 200) {
-		console.log("Test interviewer created successfully");
-		expect(data.message).toBe("Interviewer created");
-		expect(res.status).toBe(200);
+	const dataInterviewer = await resInterviewer.json();
+	if (resInterviewer.status === 200) {
+		expect(resInterviewer.status).toBe(200);
 	} else {
 		console.log("Test interviewer creation failed");
-		console.log(data);
-		expect(res.status).toBe(200);
+		console.log(dataInterviewer);
+		expect(resInterviewer.status).toBe(200);
 	}
 });

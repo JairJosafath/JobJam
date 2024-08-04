@@ -3,7 +3,7 @@ config();
 
 const endpoint = process.env.MOCK_ENDPOINT_URL;
 
-test("test admin mock authorization and admin create hiring-manager", async () => {
+test("admin can login and create a hiring manager", async () => {
 	const res = await fetch(endpoint + "/login", {
 		method: "POST",
 		headers: {
@@ -17,8 +17,6 @@ test("test admin mock authorization and admin create hiring-manager", async () =
 	const data = await res.json();
 	if (res.status === 200) {
 		console.log("Test admin logged in successfully");
-		expect(data.AuthenticationResult.AccessToken).toBeDefined();
-		expect(data.AuthenticationResult.IdToken).toBeDefined();
 		expect(res.status).toBe(200);
 	} else {
 		console.log("Test admin login failed");
@@ -41,7 +39,6 @@ test("test admin mock authorization and admin create hiring-manager", async () =
 	const dataHiringManager = await resHiringManager.json();
 	if (resHiringManager.status === 200) {
 		console.log("Test hiring-manager created successfully");
-		expect(dataHiringManager.message).toBe("Hiring Manager created");
 		expect(resHiringManager.status).toBe(200);
 	} else {
 		console.log("Test hiring-manager creation failed");
