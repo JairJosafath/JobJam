@@ -3,7 +3,7 @@ config();
 
 const endpoint = process.env.MOCK_ENDPOINT_URL;
 
-test("test admin login", async () => {
+test("test admin mock authorization", async () => {
 	const res = await fetch(endpoint + "/login", {
 		method: "POST",
 		headers: {
@@ -45,5 +45,29 @@ test("test admin login", async () => {
 		console.log("Test interviewer mock endpoint access failed");
 		console.log(dataInterviewer);
 		expect(resInterviewer.status).toBe(200);
+	}
+});
+
+test(" admin create interviewer", async () => {
+	const res = await fetch(endpoint + "/interviewer", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			username: "test-interviewer",
+			email: process.env.TEST_INTERVIEWER_EMAIL,
+			password: process.env.TEST_INTERVIEWER_PASSWORD,
+		}),
+	});
+	const data = await res.json();
+	if (res.status === 200) {
+		console.log("Test interviewer created successfully");
+		expect(data.message).toBe("Interviewer created");
+		expect(res.status).toBe(200);
+	} else {
+		console.log("Test interviewer creation failed");
+		console.log(data);
+		expect(res.status).toBe(200);
 	}
 });

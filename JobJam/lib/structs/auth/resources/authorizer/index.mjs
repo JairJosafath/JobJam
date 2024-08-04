@@ -13,6 +13,8 @@ export async function handler(event) {
 
 	const token = event.headers.Authorization;
 	const methodArn = event.methodArn;
+	const resource = event.resource;
+	const method = event.httpMethod;
 
 	try {
 		const claims = await jwtVerifier.verify(token);
@@ -26,6 +28,12 @@ export async function handler(event) {
 			return {
 				statusCode: 401,
 				body: JSON.stringify({ message: "Email not verified" }),
+			};
+		}
+		if (resource === "interviewer" && method === "POST" && role !== "admin") {
+			return {
+				statusCode: 401,
+				body: JSON.stringify({ message: "Unauthorized" }),
 			};
 		}
 		if (role === "admin") {

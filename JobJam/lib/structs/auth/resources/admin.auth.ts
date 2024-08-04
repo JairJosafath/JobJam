@@ -102,7 +102,8 @@ export class AuthAdminResource extends Construct {
 						},
 					],
 				},
-			})
+			}),
+			{ authorizer }
 		);
 
 		const mockResource = interviewerResource.addResource("mock");

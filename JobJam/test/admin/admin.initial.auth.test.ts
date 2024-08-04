@@ -64,6 +64,13 @@ test("admin first time login", async () => {
 
 	if (res.status === 200) {
 		console.log("Test admin logged in successfully");
+		expect({
+			username: data.ChallengeParameters.USER_ID_FOR_SRP,
+			challengeName: data.ChallengeName,
+		}).toStrictEqual({
+			username: "test-admin",
+			challengeName: "NEW_PASSWORD_REQUIRED",
+		});
 	}
 
 	// post to challenge resource with challenge name, session, and new password
@@ -85,13 +92,6 @@ test("admin first time login", async () => {
 		const dataChallenge = await resChallenge.json();
 
 		expect(dataChallenge.AuthenticationResult.AccessToken).toBeDefined();
-		expect({
-			username: data.ChallengeParameters.USER_ID_FOR_SRP,
-			challengeName: data.ChallengeName,
-		}).toStrictEqual({
-			username: "test-admin",
-			challengeName: "NEW_PASSWORD_REQUIRED",
-		});
 	} else {
 		console.log("Test admin password reset failed");
 		// reason of failure
