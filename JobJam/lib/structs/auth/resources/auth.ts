@@ -170,7 +170,7 @@ export class AuthResource extends Construct {
 			})
 		);
 
-		const confirmResetResource = api.root.addResource("confirm-reset");
+		const confirmResetResource = api.root.addResource("confirm");
 		confirmResetResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -220,7 +220,7 @@ export class AuthResource extends Construct {
 			})
 		);
 
-		const authChallengeResource = api.root.addResource("auth-challenge");
+		const authChallengeResource = api.root.addResource("challenge");
 		authChallengeResource.addMethod(
 			"POST",
 			new AwsIntegration({
