@@ -1,5 +1,4 @@
 import { CognitoJwtVerifier } from "aws-jwt-verify";
-import { stat } from "fs";
 
 const userPoolId = process.env.COGNITO_USER_POOL_ID || "eu-north-1_goxAp24qq";
 const clientId = process.env.COGNITO_CLIENT_ID || "ncaincd0t7grg4jh660s6ph27";
@@ -22,7 +21,7 @@ export async function handler(event) {
 		const emailVerified = claims.email_verified;
 		const principalId = claims.sub;
 
-		console.log("Claims", claims);
+		console.log(resource, method, role, emailVerified, principalId);
 
 		if (!emailVerified) {
 			return {
@@ -31,7 +30,7 @@ export async function handler(event) {
 			};
 		}
 		if (
-			(resource === "interviewer" || resource === "hiring-manager") &&
+			(resource === "/interviewer" || resource === "/hiring-manager") &&
 			method === "POST" &&
 			role !== "admin"
 		) {

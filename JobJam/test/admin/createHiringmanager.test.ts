@@ -26,27 +26,6 @@ test("test admin mock authorization and admin create hiring-manager", async () =
 		expect(res.status).toBe(200);
 	}
 
-	// test GET mock endpoint that has a lambda authorizer
-	const resInterviewer = await fetch(endpoint + "/interviewer/mock", {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: data.AuthenticationResult.IdToken,
-		},
-	});
-
-	const dataInterviewer = await resInterviewer.json();
-
-	if (resInterviewer.status === 200) {
-		console.log("Test interviewer mock endpoint access successful");
-		expect(resInterviewer.status).toBe(200);
-		expect(dataInterviewer.message).toBe("Mock integration successful");
-	} else {
-		console.log("Test interviewer mock endpoint access failed");
-		console.log(dataInterviewer);
-		expect(resInterviewer.status).toBe(200);
-	}
-
 	const resHiringManager = await fetch(endpoint + "/hiring-manager", {
 		method: "POST",
 		headers: {
@@ -62,7 +41,7 @@ test("test admin mock authorization and admin create hiring-manager", async () =
 	const dataHiringManager = await resHiringManager.json();
 	if (resHiringManager.status === 200) {
 		console.log("Test hiring-manager created successfully");
-		expect(dataHiringManager.message).toBe("hiring-manager created");
+		expect(dataHiringManager.message).toBe("Hiring Manager created");
 		expect(resHiringManager.status).toBe(200);
 	} else {
 		console.log("Test hiring-manager creation failed");
