@@ -4,7 +4,13 @@ import {
 	RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
-import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import {
+	ManagedPolicy,
+	PolicyDocument,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import { AuthAdminResource } from "./admin.auth";
 
@@ -17,18 +23,24 @@ export class AuthResource extends Construct {
 		clientId: string
 	) {
 		super(scope, id);
-		const credentialsRole = new Role(this, "AuthenticationRole", {
+
+		new AuthAdminResource(scope, "AdminAuthResource", api, userPool, clientId);
+		const loginResource = api.root.addResource("login");
+		const loginRole = new Role(this, "LoginRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description:
 				"Role for the API Gateway to authenticate users in the Cognito User Pool",
-			managedPolicies: [
-				ManagedPolicy.fromAwsManagedPolicyName("AmazonCognitoPowerUser"),
-			],
+			inlinePolicies: {
+				LoginPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["cognito-idp:InitiateAuth"],
+							resources: [userPool.userPoolArn],
+						}),
+					],
+				}),
+			},
 		});
-
-		new AuthAdminResource(scope, "AdminAuthResource", api, userPool, clientId);
-
-		const loginResource = api.root.addResource("login");
 		loginResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -36,7 +48,7 @@ export class AuthResource extends Construct {
 				action: "InitiateAuth",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: loginRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							AuthParameters: {
@@ -77,6 +89,21 @@ export class AuthResource extends Construct {
 		);
 
 		const confirmResource = api.root.addResource("confirm-signup");
+		const confirmSignupRole = new Role(this, "ConfirmSignupRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description:
+				"Role for the API Gateway to authenticate users in the Cognito User Pool",
+			inlinePolicies: {
+				ConfirmSignupPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["cognito-idp:ConfirmSignUp"],
+							resources: [userPool.userPoolArn],
+						}),
+					],
+				}),
+			},
+		});
 		confirmResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -84,7 +111,7 @@ export class AuthResource extends Construct {
 				action: "ConfirmSignUp",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: confirmSignupRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							Username: "$input.path('$.username')",
@@ -126,6 +153,21 @@ export class AuthResource extends Construct {
 		);
 
 		const resetPasswordResource = api.root.addResource("reset-password");
+		const resetPasswordRole = new Role(this, "ResetPasswordRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description:
+				"Role for the API Gateway to authenticate users in the Cognito User Pool",
+			inlinePolicies: {
+				ResetPasswordPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["cognito-idp:ForgotPassword"],
+							resources: [userPool.userPoolArn],
+						}),
+					],
+				}),
+			},
+		});
 		resetPasswordResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -133,7 +175,7 @@ export class AuthResource extends Construct {
 				action: "ForgotPassword",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: resetPasswordRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							ClientId: clientId,
@@ -174,6 +216,21 @@ export class AuthResource extends Construct {
 		);
 
 		const confirmResetResource = api.root.addResource("confirm-reset");
+		const confirmResetRole = new Role(this, "ConfirmResetRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description:
+				"Role for the API Gateway to authenticate users in the Cognito User Pool",
+			inlinePolicies: {
+				ConfirmResetPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["cognito-idp:ConfirmForgotPassword"],
+							resources: [userPool.userPoolArn],
+						}),
+					],
+				}),
+			},
+		});
 		confirmResetResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -181,7 +238,7 @@ export class AuthResource extends Construct {
 				action: "ConfirmForgotPassword",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: confirmResetRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							ClientId: clientId,
@@ -224,6 +281,21 @@ export class AuthResource extends Construct {
 		);
 
 		const authChallengeResource = api.root.addResource("challenge");
+		const authChallengeRole = new Role(this, "AuthChallengeRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description:
+				"Role for the API Gateway to authenticate users in the Cognito User Pool",
+			inlinePolicies: {
+				AuthChallengePolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["cognito-idp:RespondToAuthChallenge"],
+							resources: [userPool.userPoolArn],
+						}),
+					],
+				}),
+			},
+		});
 		authChallengeResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -231,7 +303,7 @@ export class AuthResource extends Construct {
 				action: "RespondToAuthChallenge",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: authChallengeRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							ClientId: clientId,
@@ -272,6 +344,21 @@ export class AuthResource extends Construct {
 		);
 
 		const signupResource = api.root.addResource("signup");
+		const signupRole = new Role(this, "SignupRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description:
+				"Role for the API Gateway to authenticate users in the Cognito User Pool",
+			inlinePolicies: {
+				SignupPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["cognito-idp:SignUp"],
+							resources: [userPool.userPoolArn],
+						}),
+					],
+				}),
+			},
+		});
 		signupResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -279,7 +366,7 @@ export class AuthResource extends Construct {
 				action: "SignUp",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: signupRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							ClientId: clientId,

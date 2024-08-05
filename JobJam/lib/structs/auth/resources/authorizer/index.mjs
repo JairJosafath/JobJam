@@ -1,7 +1,7 @@
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 
-const userPoolId = process.env.COGNITO_USER_POOL_ID || "eu-north-1_goxAp24qq";
-const clientId = process.env.COGNITO_CLIENT_ID || "ncaincd0t7grg4jh660s6ph27";
+const userPoolId = process.env.COGNITO_USER_POOL_ID;
+const clientId = process.env.COGNITO_CLIENT_ID;
 
 export async function handler(event) {
 	const jwtVerifier = new CognitoJwtVerifier({
@@ -20,8 +20,6 @@ export async function handler(event) {
 		const role = claims["custom:role"];
 		const emailVerified = claims.email_verified;
 		const principalId = claims.sub;
-
-		console.log(resource, method, role, emailVerified, principalId);
 
 		if (!emailVerified) {
 			return {

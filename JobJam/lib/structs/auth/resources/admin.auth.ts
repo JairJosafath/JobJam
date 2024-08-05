@@ -6,7 +6,13 @@ import {
 	RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
-import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import {
+	ManagedPolicy,
+	PolicyDocument,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from "aws-cdk-lib/aws-iam";
 import { AssetCode, Runtime, Function, Code } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import path = require("path");
@@ -20,14 +26,6 @@ export class AuthAdminResource extends Construct {
 		clientId: string
 	) {
 		super(scope, id);
-		const credentialsRole = new Role(this, "AuthenticationRole", {
-			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
-			description:
-				"Role for the API Gateway to authenticate users in the Cognito User Pool",
-			managedPolicies: [
-				ManagedPolicy.fromAwsManagedPolicyName("AmazonCognitoPowerUser"),
-			],
-		});
 
 		const authorizer = new RequestAuthorizer(
 			this,
@@ -37,12 +35,30 @@ export class AuthAdminResource extends Construct {
 					runtime: Runtime.NODEJS_20_X,
 					handler: "index.handler",
 					code: Code.fromAsset(path.join(__dirname, "authorizer")),
+					environment: {
+						COGNITO_USER_POOL_ID: userPool.userPoolId,
+						COGNITO_CLIENT_ID: clientId,
+					},
 				}),
 				identitySources: ["method.request.header.Authorization"],
 			}
 		);
 
 		const interviewerResource = api.root.addResource("interviewer");
+		const addUserRole = new Role(this, "AddInterviewerRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description: "Role to add interviewer",
+			inlinePolicies: {
+				addInterviewerPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["cognito-idp:AdminCreateUser"],
+							resources: [userPool.userPoolArn],
+						}),
+					],
+				}),
+			},
+		});
 		interviewerResource.addMethod(
 			"POST",
 			new AwsIntegration({
@@ -50,7 +66,7 @@ export class AuthAdminResource extends Construct {
 				action: "AdminCreateUser",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: addUserRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							UserPoolId: userPool.userPoolId,
@@ -115,7 +131,7 @@ export class AuthAdminResource extends Construct {
 				action: "AdminCreateUser",
 				integrationHttpMethod: "POST",
 				options: {
-					credentialsRole,
+					credentialsRole: addUserRole,
 					requestTemplates: {
 						"application/json": JSON.stringify({
 							UserPoolId: userPool.userPoolId,
