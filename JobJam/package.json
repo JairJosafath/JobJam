@@ -10,10 +10,12 @@
 		"test": "jest",
 		"cdk": "cdk",
 		"deploy-dev": "cdk deploy jobjamstack-dev --profile jobjam_admin",
-		"deploy-prod": "cdk deploy jobjamstack-prod --profile jobjam_admin"
+		"deploy-prod": "cdk deploy jobjamstack-prod --profile jobjam_admin",
+		"test-initial-auth": "jest admin/initial.login.auth && jest admin/createInterviewer && jest admin/createHiringmanager && jest interviewer/initial.login.auth && jest hiring-manager/initial.login.auth && jest applicant/signup.auth"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.5.12",
+		"@types/jsonwebtoken": "^9.0.6",
 		"@types/node": "20.14.9",
 		"aws-cdk": "2.150.0",
 		"jest": "^29.7.0",
@@ -22,9 +24,12 @@
 		"typescript": "~5.5.3"
 	},
 	"dependencies": {
+		"@aws-sdk/client-cognito-identity-provider": "^3.623.0",
 		"aws-cdk-lib": "2.150.0",
+		"aws-jwt-verify": "^4.0.1",
 		"constructs": "^10.0.0",
 		"dotenv": "^16.4.5",
+		"jsonwebtoken": "^9.0.2",
 		"source-map-support": "^0.5.21"
 	}
 }
