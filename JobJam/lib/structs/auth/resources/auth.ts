@@ -13,6 +13,7 @@ import {
 } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import { AuthAdminResource } from "./admin.auth";
+import { CfnOutput } from "aws-cdk-lib";
 
 export class AuthResource extends Construct {
 	constructor(
