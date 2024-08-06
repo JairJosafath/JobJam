@@ -8,8 +8,11 @@ test("hiring manager can create a job", async () => {
 
 	const loginResponse = await fetch(endpoint + "/login", {
 		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
 		body: JSON.stringify({
-			email: process.env.TEST_HIRINGMANAGER_EMAIL,
+			username: "test-hiring-manager",
 			password: process.env.NEW_TEST_HIRINGMANAGER_PASSWORD,
 		}),
 	});
@@ -19,7 +22,7 @@ test("hiring manager can create a job", async () => {
 
 	const Authorization = loginData.AuthenticationResult.IdToken;
 
-	const response = await fetch(endpoint + "/jobs", {
+	const response = await fetch(endpoint + "/job", {
 		method: "POST",
 		body: JSON.stringify({
 			title: "Software Engineer",

@@ -50,6 +50,7 @@ import {
 	Role,
 	ServicePrincipal,
 } from "aws-cdk-lib/aws-iam";
+import { vtlSerializer } from "../../../utils/vtl";
 
 export class JobResource extends Construct {
 	constructor(
@@ -75,7 +76,7 @@ export class JobResource extends Construct {
 			identitySources: ["method.request.header.Authorization"],
 		});
 
-		const jobResource = api.root.addResource("job");
+		const jobResource = api.root.addResource("jobs");
 		const createJobRole = new Role(this, "CreateJobRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description: "Role for hiring manager to create job",
@@ -99,7 +100,7 @@ export class JobResource extends Construct {
 				options: {
 					credentialsRole: createJobRole,
 					requestTemplates: {
-						"application/json": JSON.stringify({
+						"application/json": vtlSerializer({
 							TableName: dynamoDBTable.tableName,
 							Item: {
 								pk: {
@@ -140,13 +141,13 @@ export class JobResource extends Construct {
 									S: "$input.path('$.jobDescription')",
 								},
 								RequiredSkills: {
-									SS: "$input.path('$.requiredSkills')",
+									SS: `[#foreach($skill in $input.path('$.requiredSkills'))"$skill"#if($foreach.hasNext),#end#end]`,
 								},
 								Education: {
-									SS: "$input.path('$.education')",
+									SS: `[#foreach($edu in $input.path('$.Education'))"$edu"#if($foreach.hasNext),#end#end]`,
 								},
 								Deadline: {
-									SS: "$input.path('$.deadline')",
+									S: "$input.path('$.deadline')",
 								},
 								Contact: {
 									M: {
