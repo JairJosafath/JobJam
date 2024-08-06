@@ -141,27 +141,17 @@ export class JobResource extends Construct {
 							selectionPattern: "2\\d{2}",
 							responseTemplates: {
 								"application/json": JSON.stringify({
-									message: "Job created successfully",
+									jobId: "$context.requestId",
 								}),
 							},
 						},
 						{
 							selectionPattern: "4\\d{2}",
 							statusCode: "400",
-							responseTemplates: {
-								"application/json": JSON.stringify({
-									message: "$input.path('$.message')",
-								}),
-							},
 						},
 						{
 							selectionPattern: "5\\d{2}",
 							statusCode: "500",
-							responseTemplates: {
-								"application/json": JSON.stringify({
-									message: "$input.path('$.message')",
-								}),
-							},
 						},
 					],
 				},

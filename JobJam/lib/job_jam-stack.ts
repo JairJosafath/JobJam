@@ -5,6 +5,7 @@ import { AuthStruct } from "./structs/auth/auth";
 import { AuthResource } from "./structs/auth/resources/auth";
 import { DatabaseStruct } from "./structs/database/database";
 import { JobResource } from "./structs/database/resources/job";
+import { ApplicationResource } from "./structs/database/resources/application";
 
 export class JobJamStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -24,6 +25,15 @@ export class JobJamStack extends cdk.Stack {
 		const jobResources = new JobResource(
 			this,
 			"JobJamJobResources",
+			restApiConstruct.restApi,
+			authConstruct.userPool,
+			authConstruct.clientId.userPoolClientId,
+			databaseConstruct.dynamoDBTable
+		);
+
+		const applicationResources = new ApplicationResource(
+			this,
+			"JobJamApplicationResources",
 			restApiConstruct.restApi,
 			authConstruct.userPool,
 			authConstruct.clientId.userPoolClientId,
