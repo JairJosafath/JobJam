@@ -1,38 +1,3 @@
-/**
- * 
-a hiring manager should be able to create jobs. A Job has the following attributes
-
-Name: Job
-
-Title: string
-
-Department: string
-
-Location: string
-
-Type: Enum(full-time, part-time, contract, freelancer, volunteer, internship)
-
-Level: Enum(entry, mid, senior, executive)
-
-SalaryRange: map{min:int, max:int, currnecy:string}
-
-JobDescription: String
-
-RequiredSkills: String[]
-
-Education: String[]
-
-Deadline: String[]
-
-Contact: map{email:string,phone:string}
-
-datecreated
-
-lastupdated
-
-This will be under the PK = Department#<id> SK = Job#<id>#Info
-
- */
 import {
 	AwsIntegration,
 	PassthroughBehavior,
@@ -45,6 +10,7 @@ import { Function, Runtime, Code } from "aws-cdk-lib/aws-lambda";
 import path = require("path");
 import { UserPool } from "aws-cdk-lib/aws-cognito";
 import {
+	Effect,
 	PolicyDocument,
 	PolicyStatement,
 	Role,
@@ -104,10 +70,10 @@ export class JobResource extends Construct {
 							TableName: dynamoDBTable.tableName,
 							Item: {
 								pk: {
-									S: "Department#$input.path('$.department')",
+									S: "Job#$context.requestId",
 								},
 								sk: {
-									S: "Job#$context.requestId#Info",
+									S: "Info",
 								},
 								Title: {
 									S: "$input.path('$.title')",
@@ -201,6 +167,70 @@ export class JobResource extends Construct {
 				},
 			}),
 			{ authorizer }
+		);
+
+		const listJobsRole = new Role(this, "ListJobsRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description: "Role for hiring manager to list jobs",
+			inlinePolicies: {
+				listJobsPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["dynamodb:Query"],
+							resources: [`${dynamoDBTable.tableArn}/index/JobsBy*`],
+							effect: Effect.ALLOW,
+						}),
+					],
+				}),
+			},
+		});
+
+		jobResource.addMethod(
+			"GET",
+			new AwsIntegration({
+				service: "dynamodb",
+				integrationHttpMethod: "POST",
+				action: "Query",
+				options: {
+					credentialsRole: listJobsRole,
+					requestTemplates: {
+						"application/json": vtlSerializer({
+							TableName: dynamoDBTable.tableName,
+							IndexName: "$input.params('index')",
+							ExpressionAttributeValues: {
+								":pk": {
+									S: "$input.params('value')",
+								},
+								":sk": {
+									S: "Info",
+								},
+							},
+							ExpressionAttributeNames: {
+								"#pk": "$input.params('key')",
+								"#sk": "sk",
+							},
+							KeyConditionExpression: "#pk = :pk and begins_with(#sk, :sk)",
+							Limit: 10,
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+							selectionPattern: "2\\d{2}",
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+						},
+					],
+				},
+			}),
+			{}
 		);
 	}
 }
