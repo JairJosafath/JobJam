@@ -5,6 +5,7 @@ import {
 	RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import {
+	AnyPrincipal,
 	Effect,
 	PolicyDocument,
 	PolicyStatement,
@@ -34,17 +35,6 @@ export class RestApiStruct extends Construct {
 					},
 				],
 			},
-			// resource policy for the application resource to allow unauthenticated users to apply
-			policy: new PolicyDocument({
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						principals: [new ServicePrincipal("apigateway.amazonaws.com")],
-						actions: ["execute-api:Invoke"],
-						resources: [this.restApi.urlForPath("/applications")],
-					}),
-				],
-			}),
 		});
 
 		this.restApi.root.addMethod(
