@@ -37,6 +37,15 @@ export class JobJamStack extends cdk.Stack {
 			identitySources: ["method.request.header.Authorization"],
 		});
 
+		databaseConstruct.dynamoDBTable.grantReadWriteData(
+			authConstruct.lambdaTrigger
+		);
+
+		authConstruct.lambdaTrigger.addEnvironment(
+			"DYNAMODB_TABLE_NAME",
+			databaseConstruct.dynamoDBTable.tableName
+		);
+
 		const authResources = new AuthResource(
 			this,
 			"JobJamAuthResources",

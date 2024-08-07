@@ -5,14 +5,24 @@ import {
 	UserPoolClient,
 	VerificationEmailStyle,
 } from "aws-cdk-lib/aws-cognito";
+import { Code, Runtime } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
+import path = require("path");
+import { Function } from "aws-cdk-lib/aws-lambda";
 
 export class AuthStruct extends Construct {
 	readonly userPool: UserPool;
 	readonly clientId: UserPoolClient;
+	readonly lambdaTrigger: Function;
 
 	constructor(scope: Construct, id: string) {
 		super(scope, id);
+
+		this.lambdaTrigger = new Function(this, "PreSignUpLambda", {
+			runtime: Runtime.NODEJS_20_X,
+			handler: "index.handler",
+			code: Code.fromAsset(path.join(__dirname, "presignup-trigger")),
+		});
 
 		this.userPool = new UserPool(this, "JobJamUserPool", {
 			selfSignUpEnabled: true,
@@ -40,6 +50,10 @@ export class AuthStruct extends Construct {
 			removalPolicy: RemovalPolicy.DESTROY,
 			customAttributes: {
 				role: new StringAttribute(),
+				department: new StringAttribute({}),
+			},
+			lambdaTriggers: {
+				preSignUp: this.lambdaTrigger,
 			},
 		});
 		// The client is needed to authenticate the user in the frontend, in our case that will all happen in the api gateway VTL templates

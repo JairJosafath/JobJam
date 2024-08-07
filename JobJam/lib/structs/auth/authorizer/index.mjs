@@ -16,6 +16,7 @@ export async function handler(event) {
 	const token = event.headers.Authorization;
 	const resource = event.resource;
 	const httpMethod = event.httpMethod;
+
 	try {
 		const claims = await jwtVerifier.verify(token);
 		const role = claims["custom:role"];
