@@ -32,6 +32,7 @@ test("admin can login and create a hiring manager", async () => {
 		},
 		body: JSON.stringify({
 			username: "test-hiring-manager",
+			department: "Engineering",
 			email: process.env.TEST_HIRINGMANAGER_EMAIL,
 			password: process.env.TEST_HIRINGMANAGER_PASSWORD,
 		}),

@@ -31,6 +31,7 @@ test("admin can login and create an interviewer", async () => {
 		},
 		body: JSON.stringify({
 			username: "test-interviewer",
+			department: "Marketing",
 			email: process.env.TEST_INTERVIEWER_EMAIL,
 			password: process.env.TEST_INTERVIEWER_PASSWORD,
 		}),

@@ -50,7 +50,7 @@ export class AuthStruct extends Construct {
 			removalPolicy: RemovalPolicy.DESTROY,
 			customAttributes: {
 				role: new StringAttribute(),
-				department: new StringAttribute({}),
+				department: new StringAttribute(),
 			},
 			lambdaTriggers: {
 				preSignUp: this.lambdaTrigger,

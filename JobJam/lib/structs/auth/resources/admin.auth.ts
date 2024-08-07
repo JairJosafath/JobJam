@@ -72,6 +72,10 @@ export class AuthAdminResource extends Construct {
 									Name: "custom:role",
 									Value: "interviewer",
 								},
+								{
+									Name: "custom:department",
+									Value: "$input.path('$.department')",
+								},
 							],
 						}),
 					},
@@ -136,6 +140,10 @@ export class AuthAdminResource extends Construct {
 								{
 									Name: "custom:role",
 									Value: "hiring-manager",
+								},
+								{
+									Name: "custom:department",
+									Value: "$input.path('$.department')",
 								},
 							],
 						}),

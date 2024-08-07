@@ -10,18 +10,16 @@ export async function handler(event) {
 		event.response.autoVerifyPhone = true;
 		const role = event.request.userAttributes["custom:role"];
 
-		if (role !== "hiring-manager" || role !== "interviewer") {
-			throw new Error(
-				"only hiring-manager or interviewer can be created by admin"
-			);
-		} else if (role === "hiring-manager" || role === "interviewer") {
+		console.log(JSON.stringify(event));
+
+		if (role === "hiring-manager" || role === "interviewer") {
 			const params = {
 				TableName,
 				Item: {
 					pk: {
 						S: `${
 							role === "hiring-manager" ? "HiringManager" : "Interviewer"
-						}#${event.request.userAttributes.sub}`,
+						}#${event.request.userAttributes.email}`,
 					},
 					sk: {
 						S: "Info",
@@ -37,10 +35,13 @@ export async function handler(event) {
 					},
 				},
 			};
-		}
-		const res = await client.send(new PutItemCommand(params));
+			const res = await client.send(new PutItemCommand(params));
 
-		console.log(res);
+			console.log(res);
+		} else
+			throw new Error(
+				"only hiring-manager or interviewer can be created by admin"
+			);
 	}
 
 	return event;
