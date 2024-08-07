@@ -2,6 +2,7 @@ import {
 	AuthorizationType,
 	AwsIntegration,
 	CognitoUserPoolsAuthorizer,
+	MockIntegration,
 	PassthroughBehavior,
 	RequestAuthorizer,
 	RestApi,
@@ -20,6 +21,7 @@ import {
 } from "aws-cdk-lib/aws-iam";
 import { vtlSerializer } from "../../../utils/vtl";
 import { Application } from "aws-cdk-lib/aws-appconfig";
+import { Aws } from "aws-cdk-lib";
 
 export class ApplicationResource extends Construct {
 	constructor(
@@ -173,6 +175,75 @@ export class ApplicationResource extends Construct {
 								},
 								":sk": {
 									S: "Application#",
+								},
+							},
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+						},
+					],
+				},
+			}),
+			{
+				authorizer: lambdaAuthorizer,
+			}
+		);
+
+		const updateApplicationRole = new Role(this, "UpdateApplicationRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description: "Role for applicant to update their application",
+			inlinePolicies: {
+				updateApplicationPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["dynamodb:UpdateItem"],
+							resources: [dynamoDBTable.tableArn],
+						}),
+					],
+				}),
+			},
+		});
+
+		applicationResource.addResource("{applicationId}").addMethod(
+			"PATCH",
+			new AwsIntegration({
+				service: "dynamodb",
+				action: "UpdateItem",
+				options: {
+					credentialsRole: updateApplicationRole,
+					requestTemplates: {
+						"application/json": vtlSerializer({
+							TableName: dynamoDBTable.tableName,
+							Key: {
+								pk: {
+									S: "Job#$input.path('$.jobId')",
+								},
+								sk: {
+									S: "Application#$method.request.path.applicationId",
+								},
+							},
+							UpdateExpression: "SET #status = :status and #l = :l",
+							ExpressionAttributeNames: {
+								"#status": "Status",
+								"#l": "lastupdated",
+							},
+							ExpressionAttributeValues: {
+								":status": {
+									S: "$input.path('$.status')",
+								},
+								":l": {
+									S: "$context.requestTime",
 								},
 							},
 						}),
