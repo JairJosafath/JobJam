@@ -28,7 +28,9 @@ export class AuthAdminResource extends Construct {
 	) {
 		super(scope, id);
 
-		const interviewerResource = api.root.addResource("interviewer");
+		const adminResource = api.root.addResource("admin");
+
+		const interviewerResource = adminResource.addResource("interviewer");
 		const addUserRole = new Role(this, "AddInterviewerRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description: "Role to add interviewer",
@@ -107,7 +109,7 @@ export class AuthAdminResource extends Construct {
 			{ authorizer }
 		);
 
-		const hiringManagerResource = api.root.addResource("hiring-manager");
+		const hiringManagerResource = adminResource.addResource("hiring-manager");
 		hiringManagerResource.addMethod(
 			"POST",
 			new AwsIntegration({

@@ -146,7 +146,10 @@ export class ApplicationResource extends Construct {
 					statements: [
 						new PolicyStatement({
 							actions: ["dynamodb:Query"],
-							resources: [`${dynamoDBTable.tableArn}/index/*`],
+							resources: [
+								`${dynamoDBTable.tableArn}/index/*`,
+								dynamoDBTable.tableArn,
+							],
 						}),
 					],
 				}),
@@ -178,11 +181,6 @@ export class ApplicationResource extends Construct {
 					integrationResponses: [
 						{
 							statusCode: "200",
-							responseTemplates: {
-								"application/json": JSON.stringify({
-									applications: "$util.toJson($context.result.items)",
-								}),
-							},
 						},
 						{
 							selectionPattern: "4\\d{2}",
