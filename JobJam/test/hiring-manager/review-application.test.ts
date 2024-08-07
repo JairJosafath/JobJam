@@ -4,7 +4,7 @@ config();
 const ENDPOINT = process.env.ENDPOINT;
 test("the hiring manager can query applications and review them", async () => {
 	// hiring manager logs in
-	const resLogin = await fetch(`${ENDPOINT}/login`, {
+	const resLogin = await fetch(`${ENDPOINT}/auth/login`, {
 		method: "POST",
 		body: JSON.stringify({
 			username: process.env.TEST_HIRINGMANAGER_EMAIL,
@@ -39,4 +39,24 @@ test("the hiring manager can query applications and review them", async () => {
 	expect(resQueryApplications.status).toBe(200);
 
 	// hiring manager updates application status
+	const resUpdateApplication = await fetch(
+		`${ENDPOINT}/applications/830744ae-8305-4e31-9ec1-ca54551a961d`,
+		{
+			method: "PATCH",
+			body: JSON.stringify({
+				jobId: "48ebb15e-3f26-4d83-bedb-303e9f47c677",
+				status: "PENDING_INTERVIEW",
+			}),
+			headers: {
+				Authorization: dataLogin.AuthenticationResult.IdToken,
+				"Content-Type": "application/json",
+			},
+		}
+	);
+
+	const dataUpdateApplication = await resUpdateApplication.json();
+
+	console.log(dataUpdateApplication);
+
+	expect(resUpdateApplication.status).toBe(200);
 });

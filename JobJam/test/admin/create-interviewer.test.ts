@@ -4,7 +4,7 @@ config();
 const endpoint = process.env.MOCK_ENDPOINT_URL;
 
 test("admin can login and create an interviewer", async () => {
-	const res = await fetch(endpoint + "/login", {
+	const res = await fetch(endpoint + "auth/login", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -23,7 +23,7 @@ test("admin can login and create an interviewer", async () => {
 		console.log(data);
 		expect(res.status).toBe(200);
 	}
-	const resInterviewer = await fetch(endpoint + "/interviewer", {
+	const resInterviewer = await fetch(endpoint + "admin/interviewer", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
