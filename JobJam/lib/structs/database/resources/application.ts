@@ -52,7 +52,7 @@ export class ApplicationResource extends Construct {
 			},
 		});
 
-		const applyMethod = applicationResource.addMethod(
+		applicationResource.addMethod(
 			"POST",
 			new AwsIntegration({
 				service: "dynamodb",
@@ -80,7 +80,7 @@ export class ApplicationResource extends Construct {
 									S: "#if($context.authorizer.claims.sub)$context.authorizer.claims.sub#{else}unauthenticated#end",
 								},
 								ApplicantEmail: {
-									S: "#if($context.authorizer.claims.email)$context.authorizer.claims.sub#{else}unauthenticated#end",
+									S: "#if($context.authorizer.claims.email)$context.authorizer.claims.email#{else}unauthenticated#end",
 								},
 								Status: {
 									S: "PENDING",

@@ -1,5 +1,9 @@
 import { RemovalPolicy } from "aws-cdk-lib";
-import { AttributeType, TableV2 } from "aws-cdk-lib/aws-dynamodb";
+import {
+	AttributeType,
+	StreamViewType,
+	TableV2,
+} from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
 
 export class DatabaseStruct extends Construct {
@@ -47,6 +51,7 @@ export class DatabaseStruct extends Construct {
 				},
 			],
 			removalPolicy: RemovalPolicy.DESTROY,
+			dynamoStream: StreamViewType.NEW_IMAGE,
 		});
 	}
 }
