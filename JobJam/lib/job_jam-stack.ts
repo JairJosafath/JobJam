@@ -7,6 +7,9 @@ import { DatabaseStruct } from "./structs/database/database";
 import { JobResource } from "./structs/database/resources/job";
 import { ApplicationResource } from "./structs/database/resources/application";
 import { NotificationStruct } from "./structs/notification/notification";
+import { RequestAuthorizer } from "aws-cdk-lib/aws-apigateway";
+import { Code, Runtime, Function } from "aws-cdk-lib/aws-lambda";
+import path = require("path");
 
 export class JobJamStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -21,6 +24,19 @@ export class JobJamStack extends cdk.Stack {
 			databaseConstruct.dynamoDBTable
 		);
 
+		const authorizer = new RequestAuthorizer(this, "JobAuthorizer", {
+			handler: new Function(this, "JobAuthorizerFunction", {
+				runtime: Runtime.NODEJS_20_X,
+				handler: "index.handler",
+				code: Code.fromAsset(path.join(__dirname, "authorizer")),
+				environment: {
+					COGNITO_USER_POOL_ID: authConstruct.userPool.userPoolId,
+					COGNITO_CLIENT_ID: authConstruct.clientId.userPoolClientId,
+				},
+			}),
+			identitySources: ["method.request.header.Authorization"],
+		});
+
 		const authResources = new AuthResource(
 			this,
 			"JobJamAuthResources",
@@ -34,7 +50,8 @@ export class JobJamStack extends cdk.Stack {
 			restApiConstruct.restApi,
 			authConstruct.userPool,
 			authConstruct.clientId.userPoolClientId,
-			databaseConstruct.dynamoDBTable
+			databaseConstruct.dynamoDBTable,
+			authorizer
 		);
 
 		const applicationResources = new ApplicationResource(
@@ -43,7 +60,8 @@ export class JobJamStack extends cdk.Stack {
 			restApiConstruct.restApi,
 			authConstruct.userPool,
 			authConstruct.clientId.userPoolClientId,
-			databaseConstruct.dynamoDBTable
+			databaseConstruct.dynamoDBTable,
+			authorizer
 		);
 	}
 }

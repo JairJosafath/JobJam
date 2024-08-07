@@ -25,22 +25,10 @@ export class JobResource extends Construct {
 		api: RestApi,
 		userPool: UserPool,
 		clientId: string,
-		dynamoDBTable: TableV2
+		dynamoDBTable: TableV2,
+		authorizer: RequestAuthorizer
 	) {
 		super(scope, id);
-
-		const authorizer = new RequestAuthorizer(this, "JobAuthorizer", {
-			handler: new Function(this, "JobAuthorizerFunction", {
-				runtime: Runtime.NODEJS_20_X,
-				handler: "index.handler",
-				code: Code.fromAsset(path.join(__dirname, "authorizer")),
-				environment: {
-					COGNITO_USER_POOL_ID: userPool.userPoolId,
-					COGNITO_CLIENT_ID: clientId,
-				},
-			}),
-			identitySources: ["method.request.header.Authorization"],
-		});
 
 		const jobResource = api.root.addResource("jobs");
 		const createJobRole = new Role(this, "CreateJobRole", {

@@ -28,7 +28,8 @@ export class ApplicationResource extends Construct {
 		api: RestApi,
 		userPool: UserPool,
 		clientId: string,
-		dynamoDBTable: TableV2
+		dynamoDBTable: TableV2,
+		lambdaAuthorizer: RequestAuthorizer
 	) {
 		super(scope, id);
 		const authorizer = new CognitoUserPoolsAuthorizer(this, "PoolAuthorizer", {
@@ -134,6 +135,68 @@ export class ApplicationResource extends Construct {
 			{
 				authorizationType: AuthorizationType.COGNITO,
 				authorizer,
+			}
+		);
+
+		const getApplicationsRole = new Role(this, "GetApplicationsRole", {
+			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
+			description: "Role for applicant to get their applications",
+			inlinePolicies: {
+				getApplicationsPolicy: new PolicyDocument({
+					statements: [
+						new PolicyStatement({
+							actions: ["dynamodb:Query"],
+							resources: [`${dynamoDBTable.tableArn}/index/*`],
+						}),
+					],
+				}),
+			},
+		});
+
+		applicationResource.addMethod(
+			"GET",
+			new AwsIntegration({
+				service: "dynamodb",
+				action: "Query",
+				options: {
+					credentialsRole: getApplicationsRole,
+					requestTemplates: {
+						"application/json": vtlSerializer({
+							TableName: dynamoDBTable.tableName,
+							KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+							ExpressionAttributeValues: {
+								":pk": {
+									S: "Job#$input.params('jobId')",
+								},
+								":sk": {
+									S: "Application#",
+								},
+							},
+						}),
+					},
+					passthroughBehavior: PassthroughBehavior.NEVER,
+					integrationResponses: [
+						{
+							statusCode: "200",
+							responseTemplates: {
+								"application/json": JSON.stringify({
+									applications: "$util.toJson($context.result.items)",
+								}),
+							},
+						},
+						{
+							selectionPattern: "4\\d{2}",
+							statusCode: "400",
+						},
+						{
+							selectionPattern: "5\\d{2}",
+							statusCode: "500",
+						},
+					],
+				},
+			}),
+			{
+				authorizer: lambdaAuthorizer,
 			}
 		);
 	}
