@@ -28,7 +28,7 @@ export class JobJamStack extends cdk.Stack {
 			handler: new Function(this, "JobAuthorizerFunction", {
 				runtime: Runtime.NODEJS_20_X,
 				handler: "index.handler",
-				code: Code.fromAsset(path.join(__dirname, "authorizer")),
+				code: Code.fromAsset(path.join(__dirname, "structs/auth/authorizer")),
 				environment: {
 					COGNITO_USER_POOL_ID: authConstruct.userPool.userPoolId,
 					COGNITO_CLIENT_ID: authConstruct.clientId.userPoolClientId,
@@ -42,7 +42,8 @@ export class JobJamStack extends cdk.Stack {
 			"JobJamAuthResources",
 			restApiConstruct.restApi,
 			authConstruct.userPool,
-			authConstruct.clientId.userPoolClientId
+			authConstruct.clientId.userPoolClientId,
+			authorizer
 		);
 		const jobResources = new JobResource(
 			this,

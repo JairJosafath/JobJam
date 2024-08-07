@@ -1,6 +1,7 @@
 import {
 	AwsIntegration,
 	PassthroughBehavior,
+	RequestAuthorizer,
 	RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
@@ -21,11 +22,19 @@ export class AuthResource extends Construct {
 		id: string,
 		api: RestApi,
 		userPool: UserPool,
-		clientId: string
+		clientId: string,
+		authorizer: RequestAuthorizer
 	) {
 		super(scope, id);
 
-		new AuthAdminResource(scope, "AdminAuthResource", api, userPool, clientId);
+		new AuthAdminResource(
+			scope,
+			"AdminAuthResource",
+			api,
+			userPool,
+			clientId,
+			authorizer
+		);
 		const loginResource = api.root.addResource("login");
 		const loginRole = new Role(this, "LoginRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),

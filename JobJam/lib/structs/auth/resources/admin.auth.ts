@@ -23,26 +23,10 @@ export class AuthAdminResource extends Construct {
 		id: string,
 		api: RestApi,
 		userPool: UserPool,
-		clientId: string
+		clientId: string,
+		authorizer: RequestAuthorizer
 	) {
 		super(scope, id);
-
-		const authorizer = new RequestAuthorizer(
-			this,
-			"AdminAndInterviewerAuthorizer",
-			{
-				handler: new Function(this, "AdminANDInterviewerAuthorizerFunction", {
-					runtime: Runtime.NODEJS_20_X,
-					handler: "index.handler",
-					code: Code.fromAsset(path.join(__dirname, "authorizer")),
-					environment: {
-						COGNITO_USER_POOL_ID: userPool.userPoolId,
-						COGNITO_CLIENT_ID: clientId,
-					},
-				}),
-				identitySources: ["method.request.header.Authorization"],
-			}
-		);
 
 		const interviewerResource = api.root.addResource("interviewer");
 		const addUserRole = new Role(this, "AddInterviewerRole", {
