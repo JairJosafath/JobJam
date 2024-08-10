@@ -10,13 +10,16 @@ import * as cdk from "aws-cdk-lib";
 import { JobJamStack } from "../lib/job_jam-stack";
 
 const app = new cdk.App();
-new JobJamStack(app, "jobjamstack-dev", {
+const dev = new JobJamStack(app, "jobjamstack-dev", {
 	description: "JobJam stack for dev environment",
 	tags: {
 		env: "dev",
 		project: "jobjam",
 	},
 });
+
+// set context to determine if we are in dev or prod
+dev.node.setContext("env", "dev");
 
 new JobJamStack(app, "jobjamstack-prod", {
 	description: "JobJam stack for prod environment",
