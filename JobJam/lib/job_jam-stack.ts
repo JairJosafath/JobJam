@@ -10,6 +10,8 @@ import { NotificationStruct } from "./structs/notification/notification";
 import { RequestAuthorizer } from "aws-cdk-lib/aws-apigateway";
 import { Code, Runtime, Function } from "aws-cdk-lib/aws-lambda";
 import path = require("path");
+import { InterviewResource } from "./structs/database/resources/interview";
+import { InterviewerResource } from "./structs/database/resources/interviewer";
 
 export class JobJamStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -67,6 +69,26 @@ export class JobJamStack extends cdk.Stack {
 		const applicationResources = new ApplicationResource(
 			this,
 			"JobJamApplicationResources",
+			restApiConstruct.restApi,
+			authConstruct.userPool,
+			authConstruct.clientId.userPoolClientId,
+			databaseConstruct.dynamoDBTable,
+			authorizer
+		);
+
+		const InterviewResources = new InterviewResource(
+			this,
+			"JobJamInterviewResources",
+			restApiConstruct.restApi,
+			authConstruct.userPool,
+			authConstruct.clientId.userPoolClientId,
+			databaseConstruct.dynamoDBTable,
+			authorizer
+		);
+
+		const InterviewerResources = new InterviewerResource(
+			this,
+			"JobJamInterviewerResources",
 			restApiConstruct.restApi,
 			authConstruct.userPool,
 			authConstruct.clientId.userPoolClientId,

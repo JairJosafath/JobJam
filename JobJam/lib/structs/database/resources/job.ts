@@ -188,7 +188,6 @@ export class JobResource extends Construct {
 								"#sk": "sk",
 							},
 							KeyConditionExpression: "#pk = :pk and begins_with(#sk, :sk)",
-							Limit: 10,
 						}),
 					},
 					passthroughBehavior: PassthroughBehavior.NEVER,

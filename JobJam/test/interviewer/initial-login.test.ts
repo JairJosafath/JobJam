@@ -5,7 +5,7 @@ const endpoint = process.env.MOCK_ENDPOINT_URL;
 
 test("interviewer first time login", async () => {
 	// interviewer login via api
-	const res = await fetch(endpoint + "/login", {
+	const res = await fetch(endpoint + "auth/login", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -34,7 +34,7 @@ test("interviewer first time login", async () => {
 	}
 
 	// interviewer password reset via api
-	const resChallenge = await fetch(endpoint + "/challenge", {
+	const resChallenge = await fetch(endpoint + "auth/challenge", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",

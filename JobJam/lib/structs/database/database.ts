@@ -47,7 +47,12 @@ export class DatabaseStruct extends Construct {
 				{
 					indexName: "InterviewsByInterviewer",
 					partitionKey: { name: "InterviewerId", type: AttributeType.STRING },
-					sortKey: { name: "InterviewId", type: AttributeType.STRING },
+					sortKey: { name: "sk", type: AttributeType.STRING },
+				},
+				{
+					indexName: "InterviewersByDepartment",
+					partitionKey: { name: "Department", type: AttributeType.STRING },
+					sortKey: { name: "pk", type: AttributeType.STRING },
 				},
 			],
 			removalPolicy: RemovalPolicy.DESTROY,
