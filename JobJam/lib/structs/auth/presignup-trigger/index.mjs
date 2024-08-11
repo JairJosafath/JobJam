@@ -15,6 +15,29 @@ export async function handler(event) {
 
     console.log(JSON.stringify(event));
 
+    if (role === "admin") {
+      const params = {
+        TableName,
+        Item: {
+          pk: {
+            S: `Admin#${event.request.userAttributes.email}`,
+          },
+          sk: {
+            S: "Info",
+          },
+          Email: {
+            S: event.request.userAttributes.email,
+          },
+          Role: {
+            S: role,
+          },
+        },
+      };
+      const res = await client.send(new PutItemCommand(params));
+
+      console.log(res);
+    }
+
     if (role === "hiring-manager" || role === "interviewer") {
       const params = {
         TableName,

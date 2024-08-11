@@ -5,11 +5,10 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider";
 config();
 
-const client = new CognitoIdentityProviderClient({});
+const client = new CognitoIdentityProviderClient();
 const endpoint = process.env.API_ENDPOINT;
 
-test("admin user can be created", async () => {
-	// create test-admin user
+test("admin user can be created, admin can perform initial login and password reset", async () => {
 	const command = new AdminCreateUserCommand({
 		UserPoolId: process.env.USER_POOL_ID,
 		Username: "test-admin",
@@ -32,17 +31,14 @@ test("admin user can be created", async () => {
 		],
 	});
 
-	const res = await client.send(command);
-	if (res.$metadata.httpStatusCode === 200) {
+	const res1 = await client.send(command);
+	if (res1.$metadata.httpStatusCode === 200) {
 		console.log("Test admin created successfully");
 		expect({
-			status: res.$metadata.httpStatusCode,
-			username: res.User?.Username,
+			status: res1.$metadata.httpStatusCode,
+			username: res1.User?.Username,
 		}).toStrictEqual({ status: 200, username: "test-admin" });
 	}
-});
-
-test("admin can perform initial login and password reset", async () => {
 	// post to login resource with username and password
 	const res = await fetch(endpoint + "/login", {
 		method: "POST",

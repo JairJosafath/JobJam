@@ -1,14 +1,14 @@
 import { config } from "dotenv";
 
 config();
-const ENDPOINT = process.env.ENDPOINT;
+const ENDPOINT = process.env.API_ENDPOINT;
 test("the hiring manager can query interviewers and assign them to an application by creating an interview", async () => {
 	// hiring manager logs in
 	const resLogin = await fetch(`${ENDPOINT}/auth/login`, {
 		method: "POST",
 		body: JSON.stringify({
 			username: "test-hiring-manager",
-			password: process.env.NEW_TEST_HIRINGMANAGER_PASSWORD,
+			password: process.env.NEW_PASSWORD,
 		}),
 		headers: { "Content-Type": "application/json" },
 	});
@@ -40,13 +40,28 @@ test("the hiring manager can query interviewers and assign them to an applicatio
 
 	expect(resQueryInterviewers.status).toBe(200);
 
+	// get applications
+	const resGetApplications = await fetch(`${ENDPOINT}/applications/query?index
+		=ApplicationsByDepartment&value=Marketing&key=Department
+		`, {
+		method: "GET",
+		headers: {
+			Authorization: dataLogin.AuthenticationResult.IdToken,
+		},
+	});
+
+	const dataGetApplications = await resGetApplications.json();
+
+	console.log(dataGetApplications);
+	const application = dataGetApplications.Items[0];
+
 	// hiring manager assigns an interviewer to an application
 	const resAssignInterviewer = await fetch(`${ENDPOINT}/interviews`, {
 		method: "POST",
 		body: JSON.stringify({
-			jobId: "3e4d98a3-b714-4896-b4bd-90851078753f",
-			interviewerId: interviewer.pk.S,
-			applicationId: "baf85e34-0279-41f7-bcbd-7fbb18fbeffb",
+			applicationId: application.ApplicationId.S,
+			interviewerId: interviewer.InterviewerId.S,
+			interviewerEmail: interviewer.Email.S
 		}),
 		headers: {
 			Authorization: dataLogin.AuthenticationResult.IdToken,

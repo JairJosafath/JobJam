@@ -54,6 +54,11 @@ export class DatabaseStruct extends Construct {
 					partitionKey: { name: "Department", type: AttributeType.STRING },
 					sortKey: { name: "pk", type: AttributeType.STRING },
 				},
+				{
+					indexName: "ApplicationsByDepartment",
+					partitionKey: { name: "Department", type: AttributeType.STRING },
+					sortKey: { name: "ApplicationId", type: AttributeType.STRING },
+				}
 			],
 			removalPolicy: RemovalPolicy.DESTROY,
 			dynamoStream: StreamViewType.NEW_IMAGE,

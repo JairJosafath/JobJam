@@ -113,6 +113,15 @@ export class JobResource extends Construct {
 										},
 									},
 								},
+								HiringManagerId: {
+									S: "$context.authorizer.claims.sub",
+								},
+								HiringManagerEmail:{
+									S: "$context.authorizer.claims.email",
+								},
+								createdBy: {
+									S: "$context.authorizer.claims.sub",
+								},
 								datecreated: {
 									S: "$context.requestTime",
 								},

@@ -22,56 +22,45 @@ test("authenticated user can apply to a job", async () => {
 		console.log(loginJson);
 	}
 	expect(loginResponse.status).toBe(200);
-
-	const applyResponse = await fetch(`${endpoint}/applications`, {
-		method: "POST",
-		body: JSON.stringify({
-			jobId: "48ebb15e-3f26-4d83-bedb-303e9f47c677",
-			resume: "https://example.com/resume",
-			coverLetter: "I am a great fit for this job",
-			contact: {
-				email: process.env.TEST_APPLICANT_EMAIL,
-				phone: "1234567890",
-			},
-		}),
+// list jobs
+	const listJobsResponse = await fetch(`${endpoint}/jobs?index=JobsByLevel&value=junior-level&key=Level`, {
+		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
 			Authorization: loginJson.AuthenticationResult.IdToken,
 		},
 	});
 
-	const applyJson = await applyResponse.json();
+	const listJobsJson = await listJobsResponse.json();
+	if (listJobsResponse.status !== 200) {
+		console.log(listJobsJson);
+	}
+	expect(listJobsResponse.status).toBe(200);
 
+	const job = listJobsJson.Items[0];
+
+	const applyResponse = await fetch(`${endpoint}/applications`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: loginJson.AuthenticationResult.IdToken,
+		},
+		body: JSON.stringify({
+			jobId: job.JobId.S,
+			resume: "https://example.com/resume",
+			coverLetter: "I am a great fit for this job",
+			department: job.Department.S,
+			contact:{
+				email: process.env.EMAIL?.replace("@", "+applicant@"),
+				phone: "1234567890",
+			}
+		}),
+		})
+	const applyJson = await applyResponse.json();
 	if (applyResponse.status !== 200) {
 		console.log(applyJson);
 	}
-
 	expect(applyResponse.status).toBe(200);
-});
+	});
 
-// test("unauthenticated user can apply to a job", async () => {
-// 	const applyResponse = await fetch(`${endpoint}/applications`, {
-// 		method: "POST",
-// 		body: JSON.stringify({
-// 			jobId: "48ebb15e-3f26-4d83-bedb-303e9f47c677",
-// 			resume: "https://example.com/resume",
-// 			coverLetter:
-// 				"I am also a great fit for this job but I dont want to make a profile",
-// 			contact: {
-// 				email: process.env.TEST_APPLICANT_EMAIL,
-// 				phone: "1234567890",
-// 			},
-// 		}),
-// 		headers: {
-// 			"Content-Type": "application/json",
-// 		},
-// 	});
-
-// 	const applyJson = await applyResponse.json();
-
-// 	if (applyResponse.status !== 200) {
-// 		console.log(applyJson);
-// 	}
-
-// 	expect(applyResponse.status).toBe(200);
-// });
+	

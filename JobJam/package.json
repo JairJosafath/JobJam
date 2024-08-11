@@ -11,7 +11,8 @@
 		"cdk": "cdk",
 		"deploy-dev": "cdk deploy jobjamstack-dev --profile jobjam_admin",
 		"deploy-prod": "cdk deploy jobjamstack-prod --profile jobjam_admin",
-		"test-initial-auth": "jest admin/initial-login && jest admin/create-interviewer && jest admin/create-hiringmanager && jest interviewer/initial-login && jest hiring-manager/initial-login && jest applicant/signup"
+		"test-initial-auth": "jest admin/initial-login && jest admin/create && jest interviewer/initial-login && jest hiring-manager/initial-login && jest applicant/signup && jest applicant/login",
+		"test-process": "jest hiring-manager/create && jest applicant/apply && jest hiring-manager/assign"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.5.12",
