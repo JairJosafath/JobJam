@@ -25,8 +25,6 @@ export class AuthStruct extends Construct {
 			handler: "index.handler",
 			code: Code.fromAsset(path.join(__dirname, "presignup-trigger")),
 			environment:{
-				// get stack tag to determine if we are in dev or prod
-				ENV: this.node.tryGetContext("env")||"",
 				TEST_EMAIL: process.env.EMAIL || "",
 			}
 		});

@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config();
 
-const endpoint = process.env.MOCK_ENDPOINT_URL;
+const endpoint = process.env.API_ENDPOINT;
 
 test("interviewer first time login", async () => {
 	// interviewer login via api
@@ -12,7 +12,7 @@ test("interviewer first time login", async () => {
 		},
 		body: JSON.stringify({
 			username: "test-interviewer",
-			password: process.env.TEST_INTERVIEWER_PASSWORD,
+			password: process.env.PASSWORD,
 		}),
 	});
 
@@ -42,7 +42,7 @@ test("interviewer first time login", async () => {
 		body: JSON.stringify({
 			challengeName: data.ChallengeName,
 			username: "test-interviewer",
-			newPassword: process.env.NEW_TEST_INTERVIEWER_PASSWORD,
+			newPassword: process.env.NEW_PASSWORD,
 			session: data.Session,
 		}),
 	});

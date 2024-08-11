@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config();
 
-const endpoint = process.env.MOCK_ENDPOINT_URL;
+const endpoint = process.env.API_ENDPOINT;
 
 test("admin can login and create a hiring manager", async () => {
 	const res = await fetch(endpoint + "auth/login", {
@@ -11,7 +11,7 @@ test("admin can login and create a hiring manager", async () => {
 		},
 		body: JSON.stringify({
 			username: "test-admin",
-			password: process.env.NEW_TEST_ADMIN_PASSWORD,
+			password: process.env.PASSWORD,
 		}),
 	});
 	const data = await res.json();
@@ -33,8 +33,8 @@ test("admin can login and create a hiring manager", async () => {
 		body: JSON.stringify({
 			username: "test-hiring-manager",
 			department: "Engineering",
-			email: process.env.TEST_HIRINGMANAGER_EMAIL,
-			password: process.env.TEST_HIRINGMANAGER_PASSWORD,
+			email: process.env.EMAIL?.replace("@", "+hiringmanager@"),
+			password: process.env.PASSWORD,
 		}),
 	});
 	const dataHiringManager = await resHiringManager.json();

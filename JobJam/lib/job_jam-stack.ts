@@ -48,6 +48,10 @@ export class JobJamStack extends cdk.Stack {
 			databaseConstruct.dynamoDBTable.tableName
 		);
 
+		const val = props?.tags?.env;
+
+		authConstruct.lambdaTrigger.addEnvironment("ENV", val || "");
+
 		const authResources = new AuthResource(
 			this,
 			"JobJamAuthResources",

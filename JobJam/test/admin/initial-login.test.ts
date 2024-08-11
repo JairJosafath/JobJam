@@ -6,7 +6,7 @@ import {
 config();
 
 const client = new CognitoIdentityProviderClient({});
-const endpoint = process.env.MOCK_ENDPOINT_URL;
+const endpoint = process.env.API_ENDPOINT;
 
 test("admin user can be created", async () => {
 	// create test-admin user
@@ -15,11 +15,11 @@ test("admin user can be created", async () => {
 		Username: "test-admin",
 		DesiredDeliveryMediums: ["EMAIL"],
 		MessageAction: "SUPPRESS",
-		TemporaryPassword: process.env.TEST_ADMIN_PASSWORD,
+		TemporaryPassword: process.env.PASSWORD,
 		UserAttributes: [
 			{
 				Name: "email",
-				Value: process.env.TEST_ADMIN_EMAIL,
+				Value: process.env.EMAIL,
 			},
 			{
 				Name: "email_verified",
@@ -51,7 +51,7 @@ test("admin can perform initial login and password reset", async () => {
 		},
 		body: JSON.stringify({
 			username: "test-admin",
-			password: process.env.TEST_ADMIN_PASSWORD,
+			password: process.env.NEW_PASSWORD,
 		}),
 	});
 
