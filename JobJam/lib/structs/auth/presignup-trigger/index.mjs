@@ -36,6 +36,8 @@ export async function handler(event) {
       const res = await client.send(new PutItemCommand(params));
 
       console.log(res);
+
+      return event;
     }
 
     if (role === "hiring-manager" || role === "interviewer") {
