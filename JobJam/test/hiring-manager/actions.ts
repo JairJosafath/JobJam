@@ -101,8 +101,8 @@ export async function query_interviewers(
 
   const dataQueryInterviewers = await resQueryInterviewers.json();
 
-  console.log(dataQueryInterviewers);
   const interviewers = dataQueryInterviewers.Items;
+  console.log({ interviewers });
 
   return interviewers;
 }
@@ -122,8 +122,8 @@ export async function query_applications(token: string): Promise<any[]> {
 
   const dataGetApplications = await resGetApplications.json();
 
-  console.log(dataGetApplications);
   const applications = dataGetApplications.Items;
+  console.log({ applications });
   return applications;
 }
 

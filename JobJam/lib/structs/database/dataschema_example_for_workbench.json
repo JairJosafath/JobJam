@@ -1,0 +1,474 @@
+{
+  "ModelName": "Hiring management",
+  "ModelMetadata": {
+    "Author": "",
+    "DateCreated": "Aug 12, 2024, 06:58 AM",
+    "DateLastModified": "Aug 12, 2024, 06:58 AM",
+    "Description": "This model is used to manage the hiring process of a company.",
+    "AWSService": "Amazon DynamoDB",
+    "Version": "3.0"
+  },
+  "DataModel": [
+    {
+      "TableName": "JobJam",
+      "KeyAttributes": {
+        "PartitionKey": {
+          "AttributeName": "pk",
+          "AttributeType": "S"
+        },
+        "SortKey": {
+          "AttributeName": "sk",
+          "AttributeType": "S"
+        }
+      },
+      "NonKeyAttributes": [
+        {
+          "AttributeName": "role",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_id",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_title",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_description",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_location",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_type",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_post_date",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_close_date",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_status",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_skills",
+          "AttributeType": "SS"
+        },
+        {
+          "AttributeName": "job_salary_range",
+          "AttributeType": "M"
+        },
+        {
+          "AttributeName": "job_experience",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_education",
+          "AttributeType": "SS"
+        },
+        {
+          "AttributeName": "job_department",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "job_contact",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "application_id",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "application_date",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "applicant_name",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "applicant_email",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "applicant_phone",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "applicant_resume",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "application_status",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "applicant_cover_letter",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "applicant_skills",
+          "AttributeType": "SS"
+        },
+        {
+          "AttributeName": "interviewer_email",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "interview",
+          "AttributeType": "M"
+        }
+      ],
+      "GlobalSecondaryIndexes": [
+        {
+          "IndexName": "InterviewsByInterviewer",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "interviewer_email",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "sk",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "ApplicationsByApllicant",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "applicant_email",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "sk",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "JobsByDepartment",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "job_department",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "sk",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "UserByRole",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "role",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "sk",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "JobsByStatus",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "job_status",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "sk",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "JobsByLocation",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "job_location",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "sk",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        }
+      ],
+      "TableData": [
+        {
+          "pk": { "S": "JOB#1" },
+          "sk": { "S": "Info" },
+          "job_id": { "S": "1" },
+          "job_title": { "S": "Software Engineer" },
+          "job_description": {
+            "S": "Develop software solutions by studying information needs; conferring with users; studying systems flow, data usage, and work processes; investigating problem areas; following the software development lifecycle."
+          },
+          "job_location": { "S": "Remote" },
+          "job_type": { "S": "Full-time" },
+          "job_post_date": { "S": "2024-08-12" },
+          "job_close_date": { "S": "2024-08-31" },
+          "job_status": { "S": "Open" },
+          "job_skills": { "SS": ["Java", "Python", "JavaScript"] },
+          "job_salary_range": {
+            "M": {
+              "min": 80000,
+              "max": 120000
+            }
+          },
+          "job_experience": { "S": "3-5 years" },
+          "job_education": {
+            "SS": [
+              "Bachelor's degree in Computer Science",
+              "Master's degree in Computer Science"
+            ]
+          },
+          "job_department": { "S": "Engineering" },
+          "job_contact": { "S": "email@example.com" }
+        },
+        {
+          "pk": { "S": "JOB#5" },
+          "sk": { "S": "Info" },
+          "job_id": { "S": "5" },
+          "job_title": { "S": "UI/UX Designer" },
+          "job_description": {
+            "S": "Design and improve user interfaces and experiences for web and mobile applications."
+          },
+          "job_location": { "S": "San Francisco, CA" },
+          "job_type": { "S": "Full-time" },
+          "job_post_date": { "S": "2024-08-15" },
+          "job_close_date": { "S": "2024-09-15" },
+          "job_status": { "S": "Open" },
+          "job_skills": {
+            "SS": [
+              "UI Design",
+              "UX Research",
+              "Prototyping",
+              "Adobe XD",
+              "Figma"
+            ]
+          },
+          "job_salary_range": {
+            "M": {
+              "min": 75000,
+              "max": 105000
+            }
+          },
+          "job_experience": { "S": "3-5 years" },
+          "job_education": {
+            "SS": ["Bachelor's degree in Design", "Certification in UX Design"]
+          },
+          "job_department": { "S": "Design" },
+          "job_contact": { "S": "design_jobs@example.com" }
+        },
+        {
+          "pk": { "S": "JOB#6" },
+          "sk": { "S": "Info" },
+          "job_id": { "S": "6" },
+          "job_title": { "S": "Sales Manager" },
+          "job_description": {
+            "S": "Lead and manage the sales team to achieve company revenue goals."
+          },
+          "job_location": { "S": "New York, NY" },
+          "job_type": { "S": "Full-time" },
+          "job_post_date": { "S": "2024-08-10" },
+          "job_close_date": { "S": "2024-09-10" },
+          "job_status": { "S": "Closed" },
+          "job_skills": {
+            "SS": [
+              "Sales Strategy",
+              "Team Leadership",
+              "CRM Software",
+              "Negotiation"
+            ]
+          },
+          "job_salary_range": {
+            "M": {
+              "min": 85000,
+              "max": 140000
+            }
+          },
+          "job_experience": { "S": "7-10 years" },
+          "job_education": {
+            "SS": ["Bachelor's degree in Business", "MBA preferred"]
+          },
+          "job_department": { "S": "Sales" },
+          "job_contact": { "S": "sales_jobs@example.com" }
+        },
+        {
+          "pk": { "S": "JOB#7" },
+          "sk": { "S": "Info" },
+          "job_id": { "S": "7" },
+          "job_title": { "S": "Marketing Specialist" },
+          "job_description": {
+            "S": "Develop and execute marketing strategies to drive brand awareness and customer acquisition."
+          },
+          "job_location": { "S": "Austin, TX" },
+          "job_type": { "S": "Part-time" },
+          "job_post_date": { "S": "2024-08-20" },
+          "job_close_date": { "S": "2024-09-20" },
+          "job_status": { "S": "Open" },
+          "job_skills": {
+            "SS": [
+              "Digital Marketing",
+              "Content Creation",
+              "SEO",
+              "Google Analytics"
+            ]
+          },
+          "job_salary_range": {
+            "M": {
+              "min": 60000,
+              "max": 90000
+            }
+          },
+          "job_experience": { "S": "2-4 years" },
+          "job_education": {
+            "SS": [
+              "Bachelor's degree in Marketing",
+              "Certification in Digital Marketing"
+            ]
+          },
+          "job_department": { "S": "Marketing" },
+          "job_contact": { "S": "marketing_jobs@example.com" }
+        },
+        {
+          "pk": { "S": "JOB#5" },
+          "sk": { "S": "APPLICATION#2024-08-25T12:00:00#1" },
+          "job_id": { "S": "5" },
+          "application_date": { "S": "2024-08-25T12:00:00" },
+          "applicant_name": { "S": "Alice Johnson" },
+          "applicant_email": { "S": "alicej@example.com" },
+          "applicant_phone": { "S": "987-654-3210" },
+          "applicant_resume": { "S": "https://example.com/resume-alice" },
+          "applicant_cover_letter": {
+            "S": "https://example.com/cover-letter-alice"
+          },
+          "applicant_skills": { "SS": ["UI Design", "Prototyping", "Figma"] },
+          "application_id": { "S": "1" },
+          "application_status": { "S": "INTERVIEW_SCHEDULED" },
+          "interviewer_email": { "S": "interview5@example.com" },
+          "interview": {
+            "M": {
+              "interview_date": { "S": "2024-09-01T10:00:00" },
+              "interview_location": { "S": "San Francisco, CA" },
+              "interviewer_name": { "S": "Mark Wilson" }
+            }
+          }
+        },
+        {
+          "pk": { "S": "JOB#6" },
+          "sk": { "S": "APPLICATION#2024-08-15T14:30:00#2" },
+          "job_id": { "S": "6" },
+          "application_date": { "S": "2024-08-15T14:30:00" },
+          "applicant_name": { "S": "Robert Smith" },
+          "applicant_email": { "S": "roberts@example.com" },
+          "applicant_phone": { "S": "321-654-0987" },
+          "applicant_resume": { "S": "https://example.com/resume-robert" },
+          "applicant_cover_letter": {
+            "S": "https://example.com/cover-letter-robert"
+          },
+          "applicant_skills": {
+            "SS": ["Sales Strategy", "Negotiation", "CRM Software"]
+          },
+          "application_id": { "S": "2" },
+          "application_status": { "S": "HIRED" },
+          "interviewer_email": { "S": "interview6@example.com" },
+          "interview": {
+            "M": {
+              "interview_date": { "S": "2024-08-20T15:00:00" },
+              "interview_location": { "S": "New York, NY" },
+              "interviewer_name": { "S": "Susan Clark" }
+            }
+          }
+        },
+        {
+          "pk": { "S": "JOB#7" },
+          "sk": { "S": "APPLICATION#2024-08-30T09:45:00#3" },
+          "job_id": { "S": "7" },
+          "application_date": { "S": "2024-08-30T09:45:00" },
+          "applicant_name": { "S": "Jessica Lee" },
+          "applicant_email": { "S": "jessical@example.com" },
+          "applicant_phone": { "S": "456-123-7890" },
+          "applicant_resume": { "S": "https://example.com/resume-jessica" },
+          "applicant_cover_letter": {
+            "S": "https://example.com/cover-letter-jessica"
+          },
+          "applicant_skills": {
+            "SS": ["Digital Marketing", "Content Creation", "Google Analytics"]
+          },
+          "application_id": { "S": "3" },
+          "application_status": { "S": "PENDING" },
+          "interviewer_email": { "S": "interview7@example.com" },
+          "interview": {
+            "M": {
+              "interview_date": { "S": "2024-09-05T14:00:00" },
+              "interview_location": { "S": "Austin, TX" },
+              "interviewer_name": { "S": "Emily Davis" }
+            }
+          }
+        }
+      ],
+      "DataAccess": {
+        "MySql": {}
+      },
+      "BillingMode": "PROVISIONED",
+      "ProvisionedCapacitySettings": {
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        },
+        "AutoScalingRead": {
+          "ScalableTargetRequest": {
+            "MinCapacity": 1,
+            "MaxCapacity": 10,
+            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+          },
+          "ScalingPolicyConfiguration": {
+            "TargetValue": 70
+          }
+        },
+        "AutoScalingWrite": {
+          "ScalableTargetRequest": {
+            "MinCapacity": 1,
+            "MaxCapacity": 10,
+            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+          },
+          "ScalingPolicyConfiguration": {
+            "TargetValue": 70
+          }
+        }
+      }
+    }
+  ]
+}

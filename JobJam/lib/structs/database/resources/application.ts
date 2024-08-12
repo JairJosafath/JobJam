@@ -70,7 +70,7 @@ export class ApplicationResource extends Construct {
                   S: "Job#$input.path('$.jobId')",
                 },
                 sk: {
-                  S: "Application#$context.requestId",
+                  S: "Application#$context.requestTime#$context.requestId",
                 },
                 ApplicationId: {
                   S: "$context.requestId",
@@ -81,14 +81,11 @@ export class ApplicationResource extends Construct {
                 Department: {
                   S: "$input.path('$.department')",
                 },
-                ApplicantId: {
-                  S: "#if($context.authorizer.claims.sub)$context.authorizer.claims.sub#{else}unauthenticated#end",
-                },
                 ApplicantEmail: {
                   S: "#if($context.authorizer.claims.email)$context.authorizer.claims.email#{else}unauthenticated#end",
                 },
                 Status: {
-                  S: "PENDING",
+                  S: "SUBMITTED",
                 },
                 Resume: {
                   S: "$input.path('$.resume')",
