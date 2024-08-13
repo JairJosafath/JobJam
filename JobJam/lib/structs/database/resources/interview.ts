@@ -188,8 +188,8 @@ export class InterviewResource extends Construct {
             "application/json": vtlSerializer({
               TableName: dynamoDBTable.tableName,
               Key: {
-                pk: { S: "Job#$input.path('jobId')" },
-                sk: { S: "Application#$input.path('applicationId')" },
+                pk: { S: "$input.path('jobId')" },
+                sk: { S: "$input.path('applicationId')" },
               },
               UpdateExpression:
                 "set #iv = :iv, #ie = :ie, #ae = :ae, #lu = :lu, #s = :s",

@@ -5,433 +5,178 @@ const client = new DynamoDBClient();
 const sesClient = new SESv2Client();
 
 export async function handler(event) {
-  // event is a sns topic message from dynamodb stream
+  try {
+    const record = event.Records[0];
+    const pk = record.dynamodb.Keys.pk.S;
+    const sk = record.dynamodb.Keys.sk.S;
+    const newItem = record.dynamodb.NewImage;
+    const oldItem = record.dynamodb.OldImage;
+    const eventName = record.eventName;
 
-  // get the record from the event
-  const record = event.Records[0];
-  console.log(JSON.stringify(record));
-  const pk = record.dynamodb.Keys.pk.S;
-  const sk = record.dynamodb.Keys.sk.S;
-  const item = record.dynamodb.NewImage;
-  const oldItem = record.dynamodb.OldImage;
-  const eventName = record.eventName;
+    console.log("Processing record:", JSON.stringify({ pk, sk, eventName }));
 
-  console.log(JSON.stringify({ pk, sk, item }));
+    if (pk.startsWith("Job#") && sk.startsWith("Application#")) {
+      const job = await getJobDetails(pk);
+      const commonJobInfo = extractJobInfo(job);
 
-  // if the record is a new application, send a notification to the hring manager email
-  if (
-    pk.startsWith("Job#") &&
-    sk.startsWith("Application#") &&
-    eventName === "INSERT"
-  ) {
-    console.log("New application received");
-
-    // get the job details
-    const job = await getJob(pk);
-    console.log(JSON.stringify(job));
-
-    // get the hiring manager email
-    const hiringManagerEmail = job.Contact.M.email.S;
-    console.log(hiringManagerEmail);
-
-    // get the application relevant details and job info
-    const coverletter = item.CoverLetter.S;
-    const resume = item.Resume.S;
-    const jobTitle = job.Title.S;
-    const jobDepartment = job.Department.S;
-    const jobLocation = job.Location.S;
-
-    // setup the email
-    const email = emailBuilderNewApplication(
-      hiringManagerEmail,
-      coverletter,
-      resume,
-      jobTitle,
-      jobDepartment,
-      jobLocation
-    );
-
-    // send the email
-    const command = new SendEmailCommand(email);
-    const response = await sesClient.send(command);
-    console.log(response);
-  }
-  // return if tht status of the old record is the same as the new record
-  if (oldItem.Status.S === item.Status.S) {
-    console.log("Status is the same");
-    return;
-  }
-  if (
-    pk.startsWith("Job#") &&
-    sk.startsWith("Application#") &&
-    eventName === "MODIFY"
-  ) {
-    // if an interview is assigned to an interviewer, send a notification to the interviewer
-    if (item.Status.S === "PENDING_INTERVIEW") {
-      // get the job details
-      const job = await getJob(pk);
-      console.log(JSON.stringify(job));
-
-      // get the interviewer email
-      const interviewerEmail = job.Interviewer.M.email.S;
-      console.log(interviewerEmail);
-
-      // get the job info
-      const jobTitle = job.Title.S;
-      const jobDepartment = job.Department.S;
-      const jobLocation = job.Location.S;
-
-      // setup the email
-      const email = emailBuilderInterviewerAssignment(
-        interviewerEmail,
-        jobTitle,
-        jobDepartment,
-        jobLocation
-      );
-
-      // send the email
-      const command = new SendEmailCommand(email);
-      const response = await sesClient.send(command);
-      console.log(response);
+      switch (eventName) {
+        case "INSERT":
+          await handleNewApplication(newItem, commonJobInfo);
+          break;
+        case "MODIFY":
+          if (newItem.Status.S !== oldItem.Status.S) {
+            await handleStatusChange(newItem, commonJobInfo);
+          } else {
+            console.log("Status is unchanged, no action required.");
+          }
+          break;
+        default:
+          console.log("Unhandled event type:", eventName);
+      }
     }
-
-    // if an interview is scheduled, send a notification to the candidate
-    if (item.Status.S === "INTERVIEW_SCHEDULED") {
-      // get the job details
-      const job = await getJob(pk);
-      console.log(JSON.stringify(job));
-
-      // get the candidate email
-      const candidateEmail = item.Candidate.M.email.S;
-      console.log(candidateEmail);
-
-      // get the job info
-      const jobTitle = job.Title.S;
-      const jobDepartment = job.Department.S;
-      const jobLocation = job.Location.S;
-      const interviewDate = item.InterviewDate.S;
-
-      // setup the email
-      const email = emailBuilderInterviewScheduled(
-        candidateEmail,
-        jobTitle,
-        jobDepartment,
-        jobLocation,
-        interviewDate
-      );
-
-      // send the email
-      const command = new SendEmailCommand(email);
-      const response = await sesClient.send(command);
-      console.log(response);
-    }
-
-    // if feedback is given, send notification to hiring manager
-    if (item.Status.S === "INTERVIEW_COMPLETED") {
-      // get the job details
-      const job = await getJob(pk);
-      console.log(JSON.stringify(job));
-
-      // get the hiring manager email
-      const hiringManagerEmail = job.Contact.M.email.S;
-      console.log(hiringManagerEmail);
-
-      // get the job info
-      const jobTitle = job.Title.S;
-      const jobDepartment = job.Department.S;
-      const jobLocation = job.Location.S;
-
-      // setup the email
-      const email = emailBuilderInterviewCompleted(
-        hiringManagerEmail,
-        jobTitle,
-        jobDepartment,
-        jobLocation
-      );
-
-      // send the email
-      const command = new SendEmailCommand(email);
-      const response = await sesClient.send(command);
-      console.log(response);
-    }
-
-    //if an offer is made, send a notification to the candidate
-    if (item.Status.S === "OFFER_MADE") {
-      // get the job details
-      const job = await getJob(pk);
-      console.log(JSON.stringify(job));
-
-      // get the candidate email
-      const candidateEmail = item.Candidate.M.email.S;
-      console.log(candidateEmail);
-
-      // get the job info
-      const jobTitle = job.Title.S;
-      const jobDepartment = job.Department.S;
-      const jobLocation = job.Location.S;
-
-      // setup the email
-      const email = emailBuilderOfferMade(
-        candidateEmail,
-        jobTitle,
-        jobDepartment,
-        jobLocation
-      );
-      // send the email
-      const command = new SendEmailCommand(email);
-
-      const response = await sesClient.send(command);
-      console.log(response);
-    }
-  }
-
-  //if an offer is accepted, send a notification to the hiring manager
-  if (item.Status.S === "OFFER_ACCEPTED") {
-    // get the job details
-    const job = await getJob(pk);
-    console.log(JSON.stringify(job));
-
-    // get the hiring manager email
-    const hiringManagerEmail = job.Contact.M.email.S;
-    console.log(hiringManagerEmail);
-
-    // get the job info
-    const jobTitle = job.Title.S;
-    const jobDepartment = job.Department.S;
-    const jobLocation = job.Location.S;
-
-    // setup the email
-    const email = emailBuilderOfferAccepted(
-      hiringManagerEmail,
-      jobTitle,
-      jobDepartment,
-      jobLocation
-    );
-
-    // send the email
-    const command = new SendEmailCommand(email);
-    const response = await sesClient.send(command);
-    console;
+  } catch (error) {
+    console.error("Error processing the event:", error);
   }
 }
 
-function emailBuilderNewApplication(
-  hiringManagerEmail,
-  coverletter,
-  resume,
-  jobTitle,
-  jobDepartment,
-  jobLocation
-) {
-  // build the email
-  const email = {
-    Destination: {
-      ToAddresses: [hiringManagerEmail],
-    },
-    FromEmailAddress: process.env.FROM_EMAIL,
-    Content: {
-      Simple: {
-        Body: {
-          Html: {
-            Data: `
-                        <h1>New Job Application</h1>
-                        <p>Job Title: ${jobTitle}</p>
-                        <p>Department: ${jobDepartment}</p>
-                        <p>Location: ${jobLocation}</p>
-                        <p>Coverletter: ${coverletter}</p>
-                        <p>Resume: ${resume}</p>
-                        `,
-          },
-        },
-        Subject: {
-          Data: "New Job Application for " + jobTitle,
-        },
-      },
-    },
-  };
-  return email;
-}
-
-async function getJob(pk) {
+async function getJobDetails(pk) {
   const params = {
     TableName: process.env.TABLENAME,
     Key: {
-      pk: {
-        S: pk,
-      },
-      sk: {
-        S: "Info",
-      },
+      pk: { S: pk },
+      sk: { S: "Info" },
     },
   };
   const command = new GetItemCommand(params);
   const response = await client.send(command);
+  console.log("Fetched job details:", JSON.stringify(response.Item));
   return response.Item;
 }
 
-function emailBuilderInterviewerAssignment(
-  interviewerEmail,
-  jobTitle,
-  jobDepartment,
-  jobLocation
-) {
-  // build the email
-  const email = {
-    Destination: {
-      ToAddresses: [interviewerEmail],
-    },
-    FromEmailAddress: process.env.FROM_EMAIL,
-    Content: {
-      Simple: {
-        Body: {
-          Html: {
-            Data: `
-						<h1>Interview Assignment</h1>
-						<p>Job Title: ${jobTitle}</p>
-						<p>Department: ${jobDepartment}</p>
-						<p>Location: ${jobLocation}</p>
-						`,
-          },
-        },
-        Subject: {
-          Data: "Interview Assignment for " + jobTitle,
-        },
-      },
-    },
+function extractJobInfo(job) {
+  return {
+    title: job.Title.S,
+    department: job.Department.S,
+    location: job.Location.S,
+    hiringManagerEmail: job.Contact.M.email.S,
+    interviewerEmail: job.Interviewer?.M?.email?.S || null,
   };
-  return email;
 }
 
-function emailBuilderInterviewScheduled(
-  candidateEmail,
-  jobTitle,
-  jobDepartment,
-  jobLocation,
-  interviewDate
-) {
-  // build the email
-  const email = {
-    Destination: {
-      ToAddresses: [candidateEmail],
-    },
-    FromEmailAddress: process.env.FROM_EMAIL,
-    Content: {
-      Simple: {
-        Body: {
-          Html: {
-            Data: `
-						<h1>Interview Scheduled</h1>
-						<p>Job Title: ${jobTitle}</p>
-						<p>Department: ${jobDepartment}</p>
-						<p>Location: ${jobLocation}</p>
-						<p>Interview Date: ${interviewDate}</p>
-						`,
-          },
-        },
-        Subject: {
-          Data: "Interview Scheduled for " + jobTitle,
-        },
-      },
-    },
-  };
-  return email;
+async function handleNewApplication(newItem, jobInfo) {
+  const email = buildEmail({
+    to: jobInfo.hiringManagerEmail,
+    subject: `New Job Application for ${jobInfo.title}`,
+    body: `
+            <h1>New Job Application</h1>
+            <p>Job Title: ${jobInfo.title}</p>
+            <p>Department: ${jobInfo.department}</p>
+            <p>Location: ${jobInfo.location}</p>
+            <p>Coverletter: ${newItem.CoverLetter.S}</p>
+            <p>Resume: ${newItem.Resume.S}</p>
+        `,
+  });
+  await sendEmail(email);
 }
 
-function emailBuilderInterviewCompleted(
-  hiringManagerEmail,
-  jobTitle,
-  jobDepartment,
-  jobLocation
-) {
-  // build the email
-  const email = {
-    Destination: {
-      ToAddresses: [hiringManagerEmail],
-    },
-    FromEmailAddress: process.env.FROM_EMAIL,
-    Content: {
-      Simple: {
-        Body: {
-          Html: {
-            Data: `
-						<h1>Interview Completed</h1>
-						<p>Job Title: ${jobTitle}</p>
-						<p>Department: ${jobDepartment}</p>
-						<p>Location: ${jobLocation}</p>
-						`,
-          },
-        },
-        Subject: {
-          Data: "Interview Completed for " + jobTitle,
-        },
-      },
-    },
-  };
-  return email;
+async function handleStatusChange(newItem, jobInfo) {
+  let email;
+
+  switch (newItem.Status.S) {
+    case "PENDING_INTERVIEW":
+      if (newItem.InterviewerEmail.S) {
+        email = buildEmail({
+          to: newItem.InterviewerEmail.S,
+          subject: `Interview Assignment for ${jobInfo.title}`,
+          body: `
+                        <h1>Interview Assignment</h1>
+                        <p>Job Title: ${jobInfo.title}</p>
+                        <p>Department: ${jobInfo.department}</p>
+                        <p>Location: ${jobInfo.location}</p>
+                    `,
+        });
+      }
+      break;
+    case "INTERVIEW_SCHEDULED":
+      email = buildEmail({
+        to: newItem.Contact.M.email.S,
+        subject: `Interview Scheduled for ${jobInfo.title}`,
+        body: `
+                    <h1>Interview Scheduled</h1>
+                    <p>Job Title: ${jobInfo.title}</p>
+                    <p>Department: ${jobInfo.department}</p>
+                    <p>Location: ${jobInfo.location}</p>
+                    <p>Interview Date: ${newItem.Interview.M.Date.S}</p>
+                    <p>Interview Time: ${newItem.Interview.M.Time.S}</p>
+                `,
+      });
+      break;
+    case "INTERVIEW_COMPLETED":
+      email = buildEmail({
+        to: jobInfo.hiringManagerEmail,
+        subject: `Interview Completed for ${jobInfo.title}`,
+        body: `
+                    <h1>Interview Completed</h1>
+                    <p>Job Title: ${jobInfo.title}</p>
+                    <p>Department: ${jobInfo.department}</p>
+                    <p>Location: ${jobInfo.location}</p>
+                `,
+      });
+      break;
+    case "OFFER_MADE":
+      email = buildEmail({
+        to: newItem.Contact.M.email.S,
+        subject: `Offer Made for ${jobInfo.title}`,
+        body: `
+                    <h1>Offer Made</h1>
+                    <p>Job Title: ${jobInfo.title}</p>
+                    <p>Department: ${jobInfo.department}</p>
+                    <p>Location: ${jobInfo.location}</p>
+                `,
+      });
+      break;
+    case "OFFER_ACCEPTED":
+      email = buildEmail({
+        to: jobInfo.hiringManagerEmail,
+        subject: `Offer Accepted for ${jobInfo.title}`,
+        body: `
+                    <h1>Offer Accepted</h1>
+                    <p>Job Title: ${jobInfo.title}</p>
+                    <p>Department: ${jobInfo.department}</p>
+                    <p>Location: ${jobInfo.location}</p>
+                `,
+      });
+      break;
+    default:
+      console.log("Unhandled status:", newItem.Status.S);
+      return;
+  }
+
+  console.log({ email });
+  if (email) {
+    await sendEmail(email);
+  }
 }
 
-function emailBuilderOfferMade(
-  candidateEmail,
-  jobTitle,
-  jobDepartment,
-  jobLocation
-) {
-  // build the email
-  const email = {
-    Destination: {
-      ToAddresses: [candidateEmail],
-    },
+function buildEmail({ to, subject, body }) {
+  return {
+    Destination: { ToAddresses: [to] },
     FromEmailAddress: process.env.FROM_EMAIL,
     Content: {
       Simple: {
-        Body: {
-          Html: {
-            Data: `
-						<h1>Offer Made</h1>
-						<p>Job Title: ${jobTitle}</p>
-						<p>Department: ${jobDepartment}</p>
-						<p>Location: ${jobLocation}</p>
-						`,
-          },
-        },
-        Subject: {
-          Data: "Offer Made for " + jobTitle,
-        },
+        Body: { Html: { Data: body } },
+        Subject: { Data: subject },
       },
     },
   };
-  return email;
 }
 
-function emailBuilderOfferAccepted(
-  hiringManagerEmail,
-  jobTitle,
-  jobDepartment,
-  jobLocation
-) {
-  // build the email
-  const email = {
-    Destination: {
-      ToAddresses: [hiringManagerEmail],
-    },
-    FromEmailAddress: process.env.FROM_EMAIL,
-    Content: {
-      Simple: {
-        Body: {
-          Html: {
-            Data: `
-						<h1>Offer Accepted</h1>
-						<p>Job Title: ${jobTitle}</p>
-						<p>Department: ${jobDepartment}</p>
-						<p>Location: ${jobLocation}</p>
-						`,
-          },
-        },
-        Subject: {
-          Data: "Offer Accepted for " + jobTitle,
-        },
-      },
-    },
-  };
-  return email;
+async function sendEmail(email) {
+  try {
+    const command = new SendEmailCommand(email);
+    const response = await sesClient.send(command);
+    console.log("Email sent successfully:", JSON.stringify(response));
+  } catch (error) {
+    console.error("Failed to send email:", error);
+  }
 }

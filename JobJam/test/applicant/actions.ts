@@ -55,7 +55,7 @@ export async function apply_for_job(token: string, job: any): Promise<boolean> {
       resume: "https://resume.com",
       coverLetter: "I am a great applicant",
       contact: {
-        email: "my-email",
+        email: process.env.EMAIL,
         phone: "1234567890",
       },
     }),

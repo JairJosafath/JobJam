@@ -130,21 +130,11 @@ export async function assign_interviewer(
   interviewer: any,
   token: string
 ): Promise<boolean> {
-  console.log({
-    jobId: application.JobId.S,
-    applicationId: `${application.datecreated.S}#${application.ApplicationId.S}`,
-    interviewerEmail: interviewer.Email.S,
-    applicantEmail: application.ApplicantEmail.S,
-    date: "TBD",
-    time: "TBD",
-    location: "TBD",
-    status: "PENDING_INTERVIEW",
-  });
   const resAssignInterviewer = await fetch(`${endpoint}/interviews`, {
     method: "POST",
     body: JSON.stringify({
-      jobId: application.JobId.S,
-      applicationId: `${application.datecreated.S}#${application.ApplicationId.S}`,
+      jobId: application.pk.S,
+      applicationId: application.sk.S,
       interviewerEmail: interviewer.Email.S,
       applicantEmail: application.ApplicantEmail.S,
     }),
