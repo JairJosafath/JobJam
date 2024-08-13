@@ -4,7 +4,7 @@ const client = new DynamoDBClient();
 const TableName = process.env.DYNAMODB_TABLE_NAME;
 const ENV = process.env.ENV || "";
 const TEST_EMAIL = process.env.TEST_EMAIL || "";
-console.log({ENV, TEST_EMAIL});
+console.log({ ENV, TEST_EMAIL });
 
 export async function handler(event) {
   if (event.triggerSource === "PreSignUp_AdminCreateUser") {
@@ -73,7 +73,19 @@ export async function handler(event) {
   }
   // auto confirm test users
   else if (event.triggerSource === "PreSignUp_SignUp") {
-    if (ENV === "dev" && event.request.userAttributes.email.includes(TEST_EMAIL.split("+")[0])) {
+    console.log(
+      `user email: ${
+        event.request.userAttributes.email
+      }, test email: ${TEST_EMAIL}
+        includes? ${event.request.userAttributes.email.includes(
+          TEST_EMAIL.split("+")[0]
+        )}
+        `
+    );
+    if (
+      ENV === "dev" &&
+      event.request.userAttributes.email.includes(TEST_EMAIL.split("+")[0])
+    ) {
       event.response.autoConfirmUser = true;
       event.response.autoVerifyEmail = true;
     }

@@ -52,7 +52,7 @@ export class InterviewerResource extends Construct {
               actions: ["dynamodb:Query"],
               resources: [
                 dynamoDBTable.tableArn,
-                `${dynamoDBTable.tableArn}/index/InterviewersByDepartment`,
+                `${dynamoDBTable.tableArn}/index/*`,
               ],
             }),
           ],
@@ -71,14 +71,18 @@ export class InterviewerResource extends Construct {
             "application/json": JSON.stringify({
               TableName: dynamoDBTable.tableName,
               IndexName: "UsersByRole",
-              KeyConditionExpression: "#pk = :pk and #sk = :sk",
+              KeyConditionExpression: "#pk = :pk and begins_with(#sk, :sk)",
               ExpressionAttributeValues: {
                 ":pk": {
-                  S: "Role",
+                  S: "interviewer",
+                },
+                ":sk": {
+                  S: "Interviewer#",
                 },
               },
               ExpressionAttributeNames: {
-                "#pk": "interviewer",
+                "#pk": "Role",
+                "#sk": "pk",
               },
             }),
           },

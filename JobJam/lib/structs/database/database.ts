@@ -15,32 +15,37 @@ export class DatabaseStruct extends Construct {
       sortKey: { name: "sk", type: AttributeType.STRING },
       globalSecondaryIndexes: [
         {
-          indexName: "ByDepartment",
+          indexName: "JobsByDepartment",
           partitionKey: { name: "Department", type: AttributeType.STRING },
-          sortKey: { name: "sk", type: AttributeType.STRING },
+          sortKey: { name: "pk", type: AttributeType.STRING },
         },
         {
-          indexName: "ByTitle",
+          indexName: "JobsByTitle",
           partitionKey: { name: "Title", type: AttributeType.STRING },
-          sortKey: { name: "sk", type: AttributeType.STRING },
+          sortKey: { name: "pk", type: AttributeType.STRING },
         },
         {
-          indexName: "ByType",
+          indexName: "JobsByType",
           partitionKey: { name: "Type", type: AttributeType.STRING },
-          sortKey: { name: "sk", type: AttributeType.STRING },
+          sortKey: { name: "pk", type: AttributeType.STRING },
         },
         {
-          indexName: "ByLevel",
+          indexName: "JobsByLevel",
           partitionKey: { name: "Level", type: AttributeType.STRING },
-          sortKey: { name: "sk", type: AttributeType.STRING },
+          sortKey: { name: "pk", type: AttributeType.STRING },
         },
         {
-          indexName: "ByLocation",
+          indexName: "JobsByLocation",
           partitionKey: { name: "Location", type: AttributeType.STRING },
-          sortKey: { name: "sk", type: AttributeType.STRING },
+          sortKey: { name: "pk", type: AttributeType.STRING },
         },
         {
-          indexName: "ByStatus",
+          indexName: "JobsByStatus",
+          partitionKey: { name: "Status", type: AttributeType.STRING },
+          sortKey: { name: "pk", type: AttributeType.STRING },
+        },
+        {
+          indexName: "ApplicationsByStatus",
           partitionKey: { name: "Status", type: AttributeType.STRING },
           sortKey: { name: "sk", type: AttributeType.STRING },
         },
@@ -51,7 +56,10 @@ export class DatabaseStruct extends Construct {
         },
         {
           indexName: "InterviewsByInterviewer",
-          partitionKey: { name: "InterviewerId", type: AttributeType.STRING },
+          partitionKey: {
+            name: "InterviewerEmail",
+            type: AttributeType.STRING,
+          },
           sortKey: { name: "sk", type: AttributeType.STRING },
         },
         {

@@ -20,8 +20,6 @@ import {
   ServicePrincipal,
 } from "aws-cdk-lib/aws-iam";
 import { vtlSerializer } from "../../../utils/vtl";
-import { Application } from "aws-cdk-lib/aws-appconfig";
-import { Aws } from "aws-cdk-lib";
 
 export class ApplicationResource extends Construct {
   constructor(

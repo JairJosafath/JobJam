@@ -126,7 +126,7 @@ export class InterviewResource extends Construct {
               IndexName: "$input.params('index')",
               ExpressionAttributeValues: {
                 ":pk": {
-                  S: "$input.params('key')",
+                  S: `#if($input.params('value')!='')$input.params('value')#{else}$util.parseJson($context.authorizer.claims).email#end`,
                 },
                 ":sk": {
                   S: "Application#",
@@ -156,7 +156,9 @@ export class InterviewResource extends Construct {
           ],
         },
       }),
-      { authorizer }
+      {
+        authorizer,
+      }
     );
 
     const createInterviewRole = new Role(this, "CreateInterviewRole", {
@@ -166,7 +168,7 @@ export class InterviewResource extends Construct {
         createInterviewPolicy: new PolicyDocument({
           statements: [
             new PolicyStatement({
-              actions: ["dynamodb:PutItem"],
+              actions: ["dynamodb:UpdateItem"],
               resources: [dynamoDBTable.tableArn],
             }),
           ],
@@ -185,20 +187,25 @@ export class InterviewResource extends Construct {
           requestTemplates: {
             "application/json": vtlSerializer({
               TableName: dynamoDBTable.tableName,
-              Item: {
+              Key: {
                 pk: { S: "Job#$input.path('jobId')" },
                 sk: { S: "Application#$input.path('applicationId')" },
-                Interview: {
-                  M: {
-                    Date: { S: "$input.path('date')" },
-                    Time: { S: "$input.path('time')" },
-                    Location: { S: "$input.path('location')" },
-                  },
-                },
-                InterviewerEmail: { S: "$input.path('interviewerEmail')" },
-                ApplicantEmail: { S: "$input.path('applicantEmail')" },
-                LastUpdated: { S: "$context.requestTime" },
-                Status: { S: "$input.path('status')" },
+              },
+              UpdateExpression:
+                "set #iv = :iv, #ie = :ie, #ae = :ae, #lu = :lu, #s = :s",
+              ExpressionAttributeValues: {
+                ":iv": { M: { Date: { S: "TBD" }, Time: { S: "TBD" } } },
+                ":ie": { S: "$input.path('interviewerEmail')" },
+                ":ae": { S: "$input.path('applicantEmail')" },
+                ":lu": { S: "$context.requestTime" },
+                ":s": { S: "PENDING_INTERVIEW" },
+              },
+              ExpressionAttributeNames: {
+                "#iv": "Interview",
+                "#ie": "InterviewerEmail",
+                "#ae": "ApplicantEmail",
+                "#lu": "LastUpdated",
+                "#s": "Status",
               },
             }),
           },
@@ -237,7 +244,7 @@ export class InterviewResource extends Construct {
       },
     });
 
-    interviewResource.addResource("{interviewId}").addMethod(
+    interviewResource.addMethod(
       "PATCH",
       new AwsIntegration({
         service: "dynamodb",
@@ -249,22 +256,25 @@ export class InterviewResource extends Construct {
             "application/json": vtlSerializer({
               TableName: dynamoDBTable.tableName,
               Key: {
-                pk: { S: "Job#$input.path('jobId')" },
-                sk: { S: "Interview#$method.request.path.interviewId" },
+                pk: { S: "$input.path('jobId')" },
+                sk: { S: "$input.path('applicationId')" },
               },
-              UpdateExpression:
-                "SET #Date = :date, #Time = :time, #Location = :location, #lastUpdated = :lastUpdated",
+              UpdateExpression: "set #iv = :iv, #lu = :lu, #s = :s",
               ExpressionAttributeValues: {
-                ":date": { S: "$input.path('date')" },
-                ":time": { S: "$input.path('time')" },
-                ":location": { S: "$input.path('location')" },
-                ":lastUpdated": { S: "$context.requestTime" },
+                ":iv": {
+                  M: {
+                    Date: { S: "$input.path('date')" },
+                    Time: { S: "$input.path('time')" },
+                    Location: { S: "$input.path('location')" },
+                  },
+                },
+                ":lu": { S: "$context.requestTime" },
+                ":s": { S: "INTERVIEW_SCHEDULED" },
               },
               ExpressionAttributeNames: {
-                "#Date": "Date",
-                "#Time": "Time",
-                "#Location": "Location",
-                "#lastUpdated": "lastUpdated",
+                "#iv": "Interview",
+                "#lu": "LastUpdated",
+                "#s": "Status",
               },
             }),
           },

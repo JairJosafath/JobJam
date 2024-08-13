@@ -157,7 +157,7 @@ export class JobResource extends Construct {
           statements: [
             new PolicyStatement({
               actions: ["dynamodb:Query"],
-              resources: [`${dynamoDBTable.tableArn}/index/JobsBy*`],
+              resources: [`${dynamoDBTable.tableArn}/index/*`],
               effect: Effect.ALLOW,
             }),
           ],
@@ -187,7 +187,7 @@ export class JobResource extends Construct {
               },
               ExpressionAttributeNames: {
                 "#pk": "$input.params('key')",
-                "#sk": "sk",
+                "#sk": "pk",
               },
               KeyConditionExpression: "#pk = :pk and begins_with(#sk, :sk)",
             }),

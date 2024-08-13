@@ -62,7 +62,7 @@ export async function login(): Promise<string> {
 
   if (resLogin.status === 200) {
     console.log("Test interviewer logged in successfully");
-    return data.token;
+    return data.AuthenticationResult.IdToken;
   } else {
     console.log("Test interviewer login failed");
     console.log(data);
@@ -71,15 +71,21 @@ export async function login(): Promise<string> {
 }
 
 export async function query_interviews(token: string): Promise<any[]> {
-  const res = await fetch(endpoint + "interviews", {
-    headers: {
-      Authorization: `${token}`,
-    },
-  });
+  const res = await fetch(
+    endpoint + "interviews?index=InterviewsByInterviewer&key=InterviewerEmail",
+    {
+      headers: {
+        Authorization: token,
+      },
+      method: "GET",
+    }
+  );
 
   if (res.status === 200) {
     console.log("Test interviewer queried interviews successfully");
-    return await res.json();
+    const interviews = await res.json();
+    console.log(interviews.Items);
+    return interviews.Items;
   } else {
     console.log("Test interviewer query interviews failed");
     console.log(await res.json());
@@ -88,15 +94,17 @@ export async function query_interviews(token: string): Promise<any[]> {
 }
 
 export async function schedule_interview(
-  interviewId: string,
+  application: any,
   token: string
 ): Promise<boolean> {
-  const res = await fetch(endpoint + "interviews/" + interviewId, {
+  const res = await fetch(endpoint + "interviews/", {
     method: "PATCH",
     body: JSON.stringify({
-      time: "2024-09-30T10:00:00Z",
-      location: "Remote",
-      date: "2024-09-30",
+      jobId: application.pk.S,
+      applicationId: application.sk.S,
+      time: "2028-09-30T10:00:00Z",
+      location: "Online",
+      date: "2027-09-30",
     }),
     headers: {
       Authorization: `${token}`,
