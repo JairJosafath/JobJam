@@ -46,12 +46,25 @@ export async function handler(event) {
     }
 
     if (
-      ["/applications", "/applications/query", "/interviews"].includes(
-        resource
-      ) &&
+      [
+        "/applications",
+        "/applications/query",
+        "/interviews/offer",
+        "/interviews",
+        "/interviews/feedback",
+      ].includes(resource) &&
       ["admin", "interviewer", "hiring-manager"].includes(role)
     ) {
       console.log("Applications modifier role");
+      return allow(principalId, { claims: JSON.stringify(claims) });
+    }
+
+    if (
+      ["/applications/query"].includes(resource) &&
+      role === "applicant" &&
+      httpMethod === "GET"
+    ) {
+      console.log("Applications query role for applicant");
       return allow(principalId, { claims: JSON.stringify(claims) });
     }
 

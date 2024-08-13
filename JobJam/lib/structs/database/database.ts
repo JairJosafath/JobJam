@@ -69,7 +69,7 @@ export class DatabaseStruct extends Construct {
         },
       ],
       removalPolicy: RemovalPolicy.DESTROY,
-      dynamoStream: StreamViewType.NEW_IMAGE,
+      dynamoStream: StreamViewType.NEW_AND_OLD_IMAGES,
     });
   }
 }

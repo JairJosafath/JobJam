@@ -107,7 +107,7 @@ export async function query_interviewers(
 export async function query_applications(token: string): Promise<any[]> {
   const resGetApplications = await fetch(
     `${endpoint}/applications/query?index
-		=ApplicationsByStatus&value=SUBMITTED&key=Status
+		=ApplicationsByStatus&value=INTERVIEW_COMPLETED&key=Status
 		`,
     {
       method: "GET",
@@ -158,6 +158,32 @@ export async function assign_interviewer(
   console.log(dataAssignInterviewer);
 
   if (resAssignInterviewer.status !== 200) {
+    return false;
+  }
+  return true;
+}
+
+export async function extend_offer(
+  application: any,
+  token: string
+): Promise<boolean> {
+  const resExtendOffer = await fetch(`${endpoint}/interviews/offer`, {
+    method: "POST",
+    body: JSON.stringify({
+      jobId: application.pk.S,
+      applicationId: application.sk.S,
+      offer: "https://example.com/offer",
+    }),
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const dataExtendOffer = await resExtendOffer.json();
+  console.log(dataExtendOffer);
+
+  if (resExtendOffer.status !== 200) {
     return false;
   }
   return true;

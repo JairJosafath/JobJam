@@ -121,3 +121,41 @@ export async function schedule_interview(
     return false;
   }
 }
+
+export async function submit_feedback(
+  application: any,
+  token: string
+): Promise<boolean> {
+  console.log(
+    JSON.stringify({
+      jobId: application.pk.S,
+      applicationId: application.sk.S,
+      feedback: `
+    The applicant was very professional and had a good understanding of the role. I think they would be a great fit for the team.
+    The salary expectations were a bit high, but I think we can negotiate. You can reach out to me if you have any questions.
+    `,
+    })
+  );
+  const res = await fetch(endpoint + "interviews/feedback", {
+    method: "POST",
+    body: JSON.stringify({
+      jobId: application.pk.S,
+      applicationId: application.sk.S,
+      feedback:
+        "The applicant was very professional and had a good understanding of the role. I think they would be a great fit for the team. The salary expectations were a bit high, but I think we can negotiate. You can reach out to me if you have any questions. UPDATED",
+    }),
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (res.status === 200) {
+    console.log("Test interviewer submitted feedback successfully");
+    return true;
+  } else {
+    console.log("Test interviewer submit feedback failed");
+    console.log(await res.json());
+    return false;
+  }
+}

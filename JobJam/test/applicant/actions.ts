@@ -26,15 +26,19 @@ export async function login(): Promise<string> {
 }
 
 export async function query_applications(token: string): Promise<any[]> {
-  const res = await fetch(`${endpoint}/applications`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await fetch(
+    `${endpoint}/applications/query?index=ApplicationsByApplicant&key=ApplicantEmail&value=`,
+    {
+      headers: {
+        Authorization: token,
+      },
+    }
+  );
 
   if (res.status === 200) {
     console.log("Test applicant queried applications successfully");
-    return await res.json();
+    const applications = await res.json();
+    return applications.Items;
   } else {
     console.log("Test applicant query applications failed");
     console.log(await res.json());
@@ -89,5 +93,33 @@ export async function query_jobs(token: string): Promise<any[]> {
     console.log("Test applicant query jobs failed");
     console.log(await res.json());
     return [];
+  }
+}
+
+export async function accept_offer(
+  application: any,
+  token: string
+): Promise<boolean> {
+  const res = await fetch(`${endpoint}/interviews/offer`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      applicationId: application.sk.S,
+      jobId: application.pk.S,
+      status: "OFFER_ACCEPTED",
+      offer: "https://offer.pdf",
+    }),
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (res.status === 200) {
+    console.log("Test applicant accepted offer successfully");
+    return true;
+  } else {
+    console.log("Test applicant accept offer failed");
+    console.log(await res.json());
+    return false;
   }
 }

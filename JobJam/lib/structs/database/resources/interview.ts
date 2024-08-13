@@ -297,5 +297,155 @@ export class InterviewResource extends Construct {
       }),
       { authorizer }
     );
+
+    interviewResource.addResource("feedback").addMethod(
+      "POST",
+      new AwsIntegration({
+        service: "dynamodb",
+        integrationHttpMethod: "POST",
+        action: "UpdateItem",
+        options: {
+          credentialsRole: updateInterviewRole,
+          requestTemplates: {
+            "application/json": vtlSerializer({
+              TableName: dynamoDBTable.tableName,
+              Key: {
+                pk: { S: "$input.path('jobId')" },
+                sk: { S: "$input.path('applicationId')" },
+              },
+              UpdateExpression: "set #iv.#f = :f, #lu = :lu, #s = :s",
+              ExpressionAttributeValues: {
+                ":f": { S: "$input.path('feedback')" },
+                ":lu": { S: "$context.requestTime" },
+                ":s": { S: "INTERVIEW_COMPLETED" },
+              },
+              ExpressionAttributeNames: {
+                "#iv": "Interview",
+                "#f": "Feedback",
+                "#lu": "LastUpdated",
+                "#s": "Status",
+              },
+            }),
+          },
+          passthroughBehavior: PassthroughBehavior.NEVER,
+          integrationResponses: [
+            {
+              statusCode: "200",
+              selectionPattern: "2\\d{2}",
+            },
+            {
+              statusCode: "400",
+              selectionPattern: "4\\d{2}",
+            },
+            {
+              statusCode: "500",
+              selectionPattern: "5\\d{2}",
+            },
+          ],
+        },
+      }),
+      {
+        authorizer,
+      }
+    );
+
+    const offerResource = interviewResource.addResource("offer");
+
+    offerResource.addMethod(
+      "POST",
+      new AwsIntegration({
+        service: "dynamodb",
+        integrationHttpMethod: "POST",
+        action: "UpdateItem",
+        options: {
+          credentialsRole: updateInterviewRole,
+          requestTemplates: {
+            "application/json": vtlSerializer({
+              TableName: dynamoDBTable.tableName,
+              Key: {
+                pk: { S: "$input.path('jobId')" },
+                sk: { S: "$input.path('applicationId')" },
+              },
+              UpdateExpression: "set #s = :s, #lu = :lu, #o = :o",
+              ExpressionAttributeValues: {
+                ":s": { S: "OFFER_MADE" },
+                ":lu": { S: "$context.requestTime" },
+                ":o": { S: "$input.path('offer')" },
+              },
+              ExpressionAttributeNames: {
+                "#s": "Status",
+                "#lu": "LastUpdated",
+                "#o": "Offer",
+              },
+            }),
+          },
+          passthroughBehavior: PassthroughBehavior.NEVER,
+          integrationResponses: [
+            {
+              statusCode: "200",
+              selectionPattern: "2\\d{2}",
+            },
+            {
+              statusCode: "400",
+              selectionPattern: "4\\d{2}",
+            },
+            {
+              statusCode: "500",
+              selectionPattern: "5\\d{2}",
+            },
+          ],
+        },
+      }),
+
+      { authorizer }
+    );
+
+    offerResource.addMethod(
+      "PATCH",
+      new AwsIntegration({
+        service: "dynamodb",
+        integrationHttpMethod: "POST",
+        action: "UpdateItem",
+        options: {
+          credentialsRole: updateInterviewRole,
+          requestTemplates: {
+            "application/json": vtlSerializer({
+              TableName: dynamoDBTable.tableName,
+              Key: {
+                pk: { S: "$input.path('jobId')" },
+                sk: { S: "$input.path('applicationId')" },
+              },
+              UpdateExpression: "set #s = :s, #lu = :lu, #o = :o",
+              ExpressionAttributeValues: {
+                ":s": { S: "$input.path('status')" },
+                ":lu": { S: "$context.requestTime" },
+                ":o": { S: "$input.path('offer')" }, // this is the offer with the signatures indicating the acceptance of the offer
+              },
+              ExpressionAttributeNames: {
+                "#s": "Status",
+                "#lu": "LastUpdated",
+                "#o": "Offer",
+              },
+            }),
+          },
+          passthroughBehavior: PassthroughBehavior.NEVER,
+          integrationResponses: [
+            {
+              statusCode: "200",
+              selectionPattern: "2\\d{2}",
+            },
+            {
+              statusCode: "400",
+              selectionPattern: "4\\d{2}",
+            },
+            {
+              statusCode: "500",
+              selectionPattern: "5\\d{2}",
+            },
+          ],
+        },
+      }),
+      { authorizer }
+    );
   }
 }

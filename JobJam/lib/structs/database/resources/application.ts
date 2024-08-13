@@ -211,7 +211,7 @@ export class ApplicationResource extends Construct {
               IndexName: "$input.params('index')",
               ExpressionAttributeValues: {
                 ":pk": {
-                  S: "$input.params('value')",
+                  S: `#if($input.params('value')!='')$input.params('value')#{else}$util.parseJson($context.authorizer.claims).email#end`,
                 },
                 ":sk": {
                   S: "Application#",
