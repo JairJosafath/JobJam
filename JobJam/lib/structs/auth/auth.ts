@@ -9,6 +9,8 @@ import { Code, Runtime } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import path = require("path");
 import { Function } from "aws-cdk-lib/aws-lambda";
+import {config} from "dotenv";
+config();
 
 export class AuthStruct extends Construct {
 	readonly userPool: UserPool;
@@ -22,6 +24,9 @@ export class AuthStruct extends Construct {
 			runtime: Runtime.NODEJS_20_X,
 			handler: "index.handler",
 			code: Code.fromAsset(path.join(__dirname, "presignup-trigger")),
+			environment:{
+				TEST_EMAIL: process.env.EMAIL || "",
+			}
 		});
 
 		this.userPool = new UserPool(this, "JobJamUserPool", {

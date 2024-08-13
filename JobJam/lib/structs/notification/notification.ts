@@ -16,8 +16,9 @@ import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { Construct } from "constructs";
 import path = require("path");
 import { config } from "dotenv";
+import { RemovalPolicy } from "aws-cdk-lib";
 config();
-const EMAIL = process.env.TEST_ADMIN_EMAIL || "";
+const EMAIL = process.env.EMAIL || "";
 
 export class NotificationStruct extends Construct {
 	constructor(scope: Construct, id: string, dynamoDBTable: TableV2) {
@@ -28,16 +29,16 @@ export class NotificationStruct extends Construct {
 		// for this project, i am using .env
 
 		new EmailIdentity(this, "JobJamEmailIdentity", {
-			identity: Identity.email(EMAIL),
-		});
+			identity: Identity.email(EMAIL.replace("@", "+admin@"))
+		}).applyRemovalPolicy(RemovalPolicy.DESTROY);
 
 		new EmailIdentity(this, "JobJamEmailIdentity2", {
 			identity: Identity.email(EMAIL.replace("@", "+interviewer@")),
-		});
+		}).applyRemovalPolicy(RemovalPolicy.DESTROY);
 
 		new EmailIdentity(this, "JobJamEmailIdentity3", {
 			identity: Identity.email(EMAIL.replace("@", "+hiringmanager@")),
-		});
+		}).applyRemovalPolicy(RemovalPolicy.DESTROY);
 
 		const notifier = new Function(this, "JobJamNotificationFunction", {
 			runtime: Runtime.NODEJS_20_X,

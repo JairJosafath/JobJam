@@ -3,9 +3,9 @@ config();
 const confirmationCode = "871852";
 
 test("applicant can confirm account", async () => {
-	const endpoint = process.env.MOCK_ENDPOINT_URL;
+	const endpoint = process.env.API_ENDPOINT;
 
-	const res = await fetch(endpoint + "/confirm-signup", {
+	const res = await fetch(endpoint + "auth/confirm-signup", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
