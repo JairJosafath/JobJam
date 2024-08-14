@@ -19,6 +19,7 @@ export class RestApiStruct extends Construct {
       description: "JobJam Rest API",
       cloudWatchRole: true,
       cloudWatchRoleRemovalPolicy: RemovalPolicy.DESTROY,
+      binaryMediaTypes: ["application/pdf"],
       deployOptions: {
         dataTraceEnabled: true,
         loggingLevel: MethodLoggingLevel.INFO,
