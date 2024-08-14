@@ -157,7 +157,7 @@ export async function extend_offer(
 	application: any,
 	token: string
 ): Promise<boolean> {
-	const resExtendOffer = await fetch(`${endpoint}/offer`, {
+	const resExtendOffer = await fetch(`${endpoint}/offers`, {
 		method: "POST",
 		body: JSON.stringify({
 			jobId: application.pk.S,
