@@ -1,6 +1,8 @@
 import { config } from "dotenv";
+import * as fs from "fs";
 
 config();
+
 const endpoint = process.env.API_ENDPOINT;
 
 export async function login(): Promise<string> {
@@ -122,4 +124,24 @@ export async function accept_offer(
     console.log(await res.json());
     return false;
   }
+}
+
+export async function upload_resume(token: string): Promise<boolean> {
+  fs.readFile("test/applicant/resume.pdf", async (err, data) => {
+    if (err) {
+      console.log("Error reading file ", err);
+      return false;
+    }
+    const res = await fetch(`${endpoint}/files/testAppId/resume/res.pdf`, {
+      method: "POST",
+      body: data,
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/pdf",
+      },
+    });
+
+    return res.status === 200;
+  });
+  return true;
 }

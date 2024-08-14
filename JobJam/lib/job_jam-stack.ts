@@ -12,6 +12,7 @@ import { Code, Runtime, Function } from "aws-cdk-lib/aws-lambda";
 import path = require("path");
 import { InterviewResource } from "./structs/database/resources/interview";
 import { InterviewerResource } from "./structs/database/resources/interviewer";
+import { StorageStruct } from "./structs/storage";
 
 export class JobJamStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -25,7 +26,12 @@ export class JobJamStack extends cdk.Stack {
       "JobJamNotification",
       databaseConstruct.dynamoDBTable
     );
-
+    const storage = new StorageStruct(
+      this,
+      "JobJamStorage",
+      restApiConstruct.restApi,
+      authConstruct.userPool
+    );
     const authorizer = new RequestAuthorizer(this, "JobAuthorizer", {
       handler: new Function(this, "JobAuthorizerFunction", {
         runtime: Runtime.NODEJS_20_X,
