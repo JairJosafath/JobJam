@@ -2,17 +2,17 @@ import { config } from "dotenv";
 config();
 
 test("applicant can sign up", async () => {
-	const endpoint = process.env.MOCK_ENDPOINT_URL;
+	const endpoint = process.env.API_ENDPOINT;
 
-	const res = await fetch(endpoint + "/signup", {
+	const res = await fetch(endpoint + "auth/signup", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
 			username: "test-applicant",
-			password: process.env.TEST_APPLICANT_PASSWORD,
-			email: process.env.TEST_APPLICANT_EMAIL,
+			password: process.env.PASSWORD,
+			email: process.env.EMAIL?.replace("@", "+applicant@"),
 		}),
 	});
 

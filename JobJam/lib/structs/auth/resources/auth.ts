@@ -1,6 +1,7 @@
 import {
 	AwsIntegration,
 	PassthroughBehavior,
+	RequestAuthorizer,
 	RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
@@ -21,12 +22,21 @@ export class AuthResource extends Construct {
 		id: string,
 		api: RestApi,
 		userPool: UserPool,
-		clientId: string
+		clientId: string,
+		authorizer: RequestAuthorizer
 	) {
 		super(scope, id);
 
-		new AuthAdminResource(scope, "AdminAuthResource", api, userPool, clientId);
-		const loginResource = api.root.addResource("login");
+		new AuthAdminResource(
+			scope,
+			"AdminAuthResource",
+			api,
+			userPool,
+			clientId,
+			authorizer
+		);
+		const authResource = api.root.addResource("auth");
+		const loginResource = authResource.addResource("login");
 		const loginRole = new Role(this, "LoginRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description:
@@ -89,7 +99,7 @@ export class AuthResource extends Construct {
 			})
 		);
 
-		const confirmResource = api.root.addResource("confirm-signup");
+		const confirmResource = authResource.addResource("confirm-signup");
 		const confirmSignupRole = new Role(this, "ConfirmSignupRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description:
@@ -153,7 +163,7 @@ export class AuthResource extends Construct {
 			})
 		);
 
-		const resetPasswordResource = api.root.addResource("reset-password");
+		const resetPasswordResource = authResource.addResource("reset-password");
 		const resetPasswordRole = new Role(this, "ResetPasswordRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description:
@@ -216,7 +226,7 @@ export class AuthResource extends Construct {
 			})
 		);
 
-		const confirmResetResource = api.root.addResource("confirm-reset");
+		const confirmResetResource = authResource.addResource("confirm-reset");
 		const confirmResetRole = new Role(this, "ConfirmResetRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description:
@@ -281,7 +291,7 @@ export class AuthResource extends Construct {
 			})
 		);
 
-		const authChallengeResource = api.root.addResource("challenge");
+		const authChallengeResource = authResource.addResource("challenge");
 		const authChallengeRole = new Role(this, "AuthChallengeRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description:
@@ -344,7 +354,7 @@ export class AuthResource extends Construct {
 			})
 		);
 
-		const signupResource = api.root.addResource("signup");
+		const signupResource = authResource.addResource("signup");
 		const signupRole = new Role(this, "SignupRole", {
 			assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
 			description:

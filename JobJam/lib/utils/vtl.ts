@@ -5,10 +5,10 @@ export function vtlSerializer(data: object): string;
  */
 
 export function vtlSerializer(data: object) {
-	const json = JSON.stringify(data);
-	const regex = /"SS":\s*"\[(.*?)\]"/g;
-	const result = json.replace(regex, (match, p1) => {
-		return match.replace(/"\[/g, "[").replace(/\]"/g, "]").replace(/\\"/g, '"');
-	});
-	return result;
+  const json = JSON.stringify(data);
+  const regex = /"SS":\s*"\[(.*?)\]"/g;
+  const result = json.replace(regex, (match, p1) => {
+    return match.replace(/"\[/g, "[").replace(/\]"/g, "]").replace(/\\"/g, '"');
+  });
+  return result;
 }
