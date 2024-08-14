@@ -38,8 +38,9 @@ export class RestApiStruct extends Construct {
       },
     });
 
+    // add a mock integration for VTL mapping output testing
     this.restApi.root.addMethod(
-      "GET",
+      "POST",
       new MockIntegration({
         integrationResponses: [
           {

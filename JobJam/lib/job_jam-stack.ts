@@ -82,8 +82,6 @@ export class JobJamStack extends cdk.Stack {
       this,
       "JobJamInterviewResources",
       restApiConstruct.restApi,
-      authConstruct.userPool,
-      authConstruct.clientId.userPoolClientId,
       databaseConstruct.dynamoDBTable,
       authorizer
     );

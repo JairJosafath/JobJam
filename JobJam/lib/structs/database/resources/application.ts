@@ -163,18 +163,36 @@ export class ApplicationResource extends Construct {
         options: {
           credentialsRole: getApplicationsRole,
           requestTemplates: {
-            "application/json": vtlSerializer({
+            "application/json": `#if($input.params('index')=='Primary')${vtlSerializer(
+              {
+                TableName: dynamoDBTable.tableName,
+                KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+                ExpressionAttributeValues: {
+                  ":pk": {
+                    S: "Job#$input.params('jobId')",
+                  },
+                  ":sk": {
+                    S: "Application#",
+                  },
+                },
+              }
+            )}#else${vtlSerializer({
               TableName: dynamoDBTable.tableName,
-              KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+              KeyConditionExpression: "#pk = :pk and begins_with(#sk, :sk)",
+              IndexName: "$input.params('index')",
               ExpressionAttributeValues: {
                 ":pk": {
-                  S: "Job#$input.params('jobId')",
+                  S: `#if($input.params('value')!='')$input.params('value')#{else}$util.parseJson($context.authorizer.claims).email#end`,
                 },
                 ":sk": {
                   S: "Application#",
                 },
               },
-            }),
+              ExpressionAttributeNames: {
+                "#pk": "$input.params('key')",
+                "#sk": "sk",
+              },
+            })}#end`,
           },
           passthroughBehavior: PassthroughBehavior.NEVER,
           integrationResponses: [
@@ -197,52 +215,52 @@ export class ApplicationResource extends Construct {
       }
     );
 
-    applicationResource.addResource("query").addMethod(
-      "GET",
-      new AwsIntegration({
-        service: "dynamodb",
-        action: "Query",
-        options: {
-          credentialsRole: getApplicationsRole,
-          requestTemplates: {
-            "application/json": vtlSerializer({
-              TableName: dynamoDBTable.tableName,
-              KeyConditionExpression: "#pk = :pk and begins_with(#sk, :sk)",
-              IndexName: "$input.params('index')",
-              ExpressionAttributeValues: {
-                ":pk": {
-                  S: `#if($input.params('value')!='')$input.params('value')#{else}$util.parseJson($context.authorizer.claims).email#end`,
-                },
-                ":sk": {
-                  S: "Application#",
-                },
-              },
-              ExpressionAttributeNames: {
-                "#pk": "$input.params('key')",
-                "#sk": "sk",
-              },
-            }),
-          },
-          passthroughBehavior: PassthroughBehavior.NEVER,
-          integrationResponses: [
-            {
-              statusCode: "200",
-            },
-            {
-              selectionPattern: "4\\d{2}",
-              statusCode: "400",
-            },
-            {
-              selectionPattern: "5\\d{2}",
-              statusCode: "500",
-            },
-          ],
-        },
-      }),
-      {
-        authorizer: lambdaAuthorizer,
-      }
-    );
+    // applicationResource.addResource("query").addMethod(
+    //   "GET",
+    //   new AwsIntegration({
+    //     service: "dynamodb",
+    //     action: "Query",
+    //     options: {
+    //       credentialsRole: getApplicationsRole,
+    //       requestTemplates: {
+    //         "application/json": vtlSerializer({
+    //           TableName: dynamoDBTable.tableName,
+    //           KeyConditionExpression: "#pk = :pk and begins_with(#sk, :sk)",
+    //           IndexName: "$input.params('index')",
+    //           ExpressionAttributeValues: {
+    //             ":pk": {
+    //               S: `#if($input.params('value')!='')$input.params('value')#{else}$util.parseJson($context.authorizer.claims).email#end`,
+    //             },
+    //             ":sk": {
+    //               S: "Application#",
+    //             },
+    //           },
+    //           ExpressionAttributeNames: {
+    //             "#pk": "$input.params('key')",
+    //             "#sk": "sk",
+    //           },
+    //         }),
+    //       },
+    //       passthroughBehavior: PassthroughBehavior.NEVER,
+    //       integrationResponses: [
+    //         {
+    //           statusCode: "200",
+    //         },
+    //         {
+    //           selectionPattern: "4\\d{2}",
+    //           statusCode: "400",
+    //         },
+    //         {
+    //           selectionPattern: "5\\d{2}",
+    //           statusCode: "500",
+    //         },
+    //       ],
+    //     },
+    //   }),
+    //   {
+    //     authorizer: lambdaAuthorizer,
+    //   }
+    // );
 
     const updateApplicationRole = new Role(this, "UpdateApplicationRole", {
       assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),

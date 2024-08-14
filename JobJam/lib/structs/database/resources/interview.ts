@@ -23,72 +23,12 @@ export class InterviewResource extends Construct {
     scope: Construct,
     id: string,
     api: RestApi,
-    userPool: UserPool,
-    clientId: string,
     dynamoDBTable: TableV2,
     authorizer: RequestAuthorizer
   ) {
     super(scope, id);
 
-    const listInterviewsRole = new Role(this, "ListInterviewsRole", {
-      assumedBy: new ServicePrincipal("apigateway.amazonaws.com"),
-      description: "Role for hiring manager or interviewer to list interviews",
-      inlinePolicies: {
-        listInterviewsPolicy: new PolicyDocument({
-          statements: [
-            new PolicyStatement({
-              actions: ["dynamodb:Query"],
-              resources: [dynamoDBTable.tableArn],
-            }),
-          ],
-        }),
-      },
-    });
-
     const interviewResource = api.root.addResource("interviews");
-    // interviewResource.addMethod(
-    // 	"GET",
-    // 	new AwsIntegration({
-    // 		service: "dynamodb",
-    // 		integrationHttpMethod: "POST",
-    // 		action: "Query",
-    // 		options: {
-    // 			credentialsRole: listInterviewsRole,
-    // 			requestTemplates: {
-    // 				"application/json": vtlSerializer({
-    // 					TableName: dynamoDBTable.tableName,
-    // 					KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
-    // 					ExpressionAttributeValues: {
-    // 						":pk": {
-    // 							S: "Job#$input.params('jobId')",
-    // 						},
-    // 						":sk": {
-    // 							S: "Interview#",
-    // 						},
-    // 					},
-    // 				}),
-    // 			},
-    // 			passthroughBehavior: PassthroughBehavior.NEVER,
-    // 			integrationResponses: [
-    // 				{
-    // 					statusCode: "200",
-    // 					selectionPattern: "2\\d{2}",
-    // 				},
-    // 				{
-    // 					statusCode: "500",
-    // 					selectionPattern: "5\\d{2}",
-    // 				},
-    // 				{
-    // 					statusCode: "400",
-    // 					selectionPattern: "4\\d{2}",
-    // 				},
-    // 			],
-    // 		},
-    // 	}),
-    // 	{
-    // 		authorizer,
-    // 	}
-    // );
 
     const queryInterviewsByInterviewerRole = new Role(
       this,
@@ -347,105 +287,6 @@ export class InterviewResource extends Construct {
       {
         authorizer,
       }
-    );
-
-    const offerResource = interviewResource.addResource("offer");
-
-    offerResource.addMethod(
-      "POST",
-      new AwsIntegration({
-        service: "dynamodb",
-        integrationHttpMethod: "POST",
-        action: "UpdateItem",
-        options: {
-          credentialsRole: updateInterviewRole,
-          requestTemplates: {
-            "application/json": vtlSerializer({
-              TableName: dynamoDBTable.tableName,
-              Key: {
-                pk: { S: "$input.path('jobId')" },
-                sk: { S: "$input.path('applicationId')" },
-              },
-              UpdateExpression: "set #s = :s, #lu = :lu, #o = :o",
-              ExpressionAttributeValues: {
-                ":s": { S: "OFFER_MADE" },
-                ":lu": { S: "$context.requestTime" },
-                ":o": { S: "$input.path('offer')" },
-              },
-              ExpressionAttributeNames: {
-                "#s": "Status",
-                "#lu": "LastUpdated",
-                "#o": "Offer",
-              },
-            }),
-          },
-          passthroughBehavior: PassthroughBehavior.NEVER,
-          integrationResponses: [
-            {
-              statusCode: "200",
-              selectionPattern: "2\\d{2}",
-            },
-            {
-              statusCode: "400",
-              selectionPattern: "4\\d{2}",
-            },
-            {
-              statusCode: "500",
-              selectionPattern: "5\\d{2}",
-            },
-          ],
-        },
-      }),
-
-      { authorizer }
-    );
-
-    offerResource.addMethod(
-      "PATCH",
-      new AwsIntegration({
-        service: "dynamodb",
-        integrationHttpMethod: "POST",
-        action: "UpdateItem",
-        options: {
-          credentialsRole: updateInterviewRole,
-          requestTemplates: {
-            "application/json": vtlSerializer({
-              TableName: dynamoDBTable.tableName,
-              Key: {
-                pk: { S: "$input.path('jobId')" },
-                sk: { S: "$input.path('applicationId')" },
-              },
-              UpdateExpression: "set #s = :s, #lu = :lu, #o = :o",
-              ExpressionAttributeValues: {
-                ":s": { S: "$input.path('status')" },
-                ":lu": { S: "$context.requestTime" },
-                ":o": { S: "$input.path('offer')" }, // this is the offer with the signatures indicating the acceptance of the offer
-              },
-              ExpressionAttributeNames: {
-                "#s": "Status",
-                "#lu": "LastUpdated",
-                "#o": "Offer",
-              },
-            }),
-          },
-          passthroughBehavior: PassthroughBehavior.NEVER,
-          integrationResponses: [
-            {
-              statusCode: "200",
-              selectionPattern: "2\\d{2}",
-            },
-            {
-              statusCode: "400",
-              selectionPattern: "4\\d{2}",
-            },
-            {
-              statusCode: "500",
-              selectionPattern: "5\\d{2}",
-            },
-          ],
-        },
-      }),
-      { authorizer }
     );
   }
 }
