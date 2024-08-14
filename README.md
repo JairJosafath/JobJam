@@ -14,10 +14,6 @@ view the notion page
 3. [Tech Stack](#tech-stack)
 4. [Architecture](#architecture)
 5. [Setup Instructions](#setup-instructions)
-6. [Usage](#usage)
-7. [Testing](#testing)
-8. [Contributing](#contributing)
-9. [License](#license)
 
 ## Overview
 
@@ -43,7 +39,7 @@ concentrate on critical business processes.
 - **AWS DynamoDB**: NoSQL database for storing job and application data.
 - **AWS S3**: Storage for static assets.
 - **AWS Cognito**: User authentication and authorization.
-- **AWS SES and SNS**: Email and SMS notifications.
+- **AWS SES**: Email notifications.
 - **AWS CDK**: Infrastructure as Code for deploying AWS resources.
 
 ## Architecture
@@ -64,11 +60,6 @@ The architecture uses a single DynamoDB table with a composite primary key
 (partition key and sort key) to efficiently manage the different entities within
 the system. Below is a simplified overview of the architecture:
 
-- **DynamoDB Table**:
-  - **Partition Key (PK)**: `DEPARTMENT#<departmentId>`
-  - **Sort Key (SK)**: Various combinations based on the entity type (e.g.,
-    `JOB#<jobId>`, `APPLICATION#<applicationId>`, etc.)
-
 ## Setup Instructions
 
 ### Prerequisites
@@ -82,7 +73,7 @@ the system. Below is a simplified overview of the architecture:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/yourusername/JobJam.git
+   git clone https://github.com/JairJosafath/JobJam2.0.git
    cd JobJam
    ```
 
@@ -92,10 +83,28 @@ the system. Below is a simplified overview of the architecture:
    npm install
    ```
 
-3. **Configure AWS CLI**:
+   You may also need to install packages for the authorizer lambda function:
 
    ```bash
-   aws configure
+   cd into the authorizer directory
+   npm install
+   ```
+
+   I usually just put the specific file in the node_modules folder, because npm
+   i adds a lot of unnecessary files.
+
+3. **Configure AWS CLI**:
+
+   I use AWS Identity center to configure my AWS CLI, you can use any way to do
+   that. I have set my profile to build the project to jobjam_admin. And have
+   scripts in npm to easily run cdk scripts. You can remove the --profile
+   jobjam_admin if you want to use your default profile. you can replace it with
+   your own profile too ofcourse.
+
+   ```json
+    "deploy-dev": "cdk deploy jobjamstack-dev --profile jobjam_admin",
+    "deploy-prod": "cdk deploy jobjamstack-prod --profile jobjam_admin",
+
    ```
 
 4. **Deploy the infrastructure**:
@@ -104,51 +113,12 @@ the system. Below is a simplified overview of the architecture:
    cdk deploy
    ```
 
+   or
+
+   ```bash
+   npm run deploy-dev
+   ```
+
 5. **Set up environment variables**: Create a `.env` file in the root directory
-   and add the necessary configuration (e.g., Cognito User Pool ID, etc.).
-
-## Usage
-
-### API Endpoints
-
-- **Create Job Listing**: `POST /jobs`
-- **Get Job Listings**: `GET /jobs`
-- **Submit Application**: `POST /applications`
-- **Review Application**: `GET /applications/{applicationId}`
-- **Schedule Interview**: `POST /interviews`
-- **Manage Offers**: `POST /offers`
-
-### User Roles
-
-- **Applicant**: Can view job listings and submit applications.
-- **Interviewer**: Can review applications and manage interviews.
-- **Hiring Manager**: Can create job listings, review applications, schedule
-  interviews, and manage offers.
-
-## Testing
-
-### VTL Templates
-
-Due to limited support for testing VTL templates, manual testing and systematic
-template building will be used. Follow these steps to test VTL templates:
-
-1. Understand the AWS resource APIs.
-2. Build and test lightweight VTL templates.
-3. Use a consistent output in CDK code.
-
-### API Testing
-
-1. Understand user behaviors and API requests.
-2. Build test data and expected return values.
-3. Use a testing library (e.g., Jest) to automate testing.
-4. Write code to mimic user behaviors and run tests on changes.
-
-## Contributing
-
-We welcome contributions! Please read our
-[Contributing Guidelines](CONTRIBUTING.md) before submitting any changes.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file
-for details.
+   and add the necessary configuration (e.g., Cognito User Pool ID, etc.). you
+   can use the .env.example file as a template.
