@@ -1,5 +1,5 @@
-import { buildEmail } from "../utils/buildEmail";
-import { sendEmail } from "../utils/sendEmail";
+import { buildEmail } from "../utils/buildEmail.mjs";
+import { sendEmail } from "../utils/sendEmail.mjs";
 
 const commonStyles = `
   <style>

@@ -106,8 +106,8 @@ export async function query_interviewers(
 
 export async function query_applications(token: string): Promise<any[]> {
   const resGetApplications = await fetch(
-    `${endpoint}/applications/query?index
-		=ApplicationsByStatus&value=INTERVIEW_COMPLETED&key=Status
+    `${endpoint}/applications?index
+		=ApplicationsByStatus&value=SUBMITTED&key=Status
 		`,
     {
       method: "GET",

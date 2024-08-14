@@ -1,6 +1,7 @@
-import { getJobDetails } from "./handlers/getJobDetails";
-import { handleNewApplication } from "./handlers/handleNewApplication";
-import { handleStatusChange } from "./handlers/handleStatusChange";
+import { getJobDetails } from "./handlers/getJobDetails.mjs";
+import { handleNewApplication } from "./handlers/handleNewApplication.mjs";
+import { handleStatusChange } from "./handlers/handleStatusChange.mjs";
+import { extractJobInfo } from "./utils/extractJobInfo.mjs";
 
 export async function handler(event) {
   try {
