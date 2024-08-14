@@ -6,7 +6,7 @@ export const jobs = [
 		status: "open",
 		department: "Data Science",
 		location: "Remote",
-		type: "Full-time",
+		type: "Part-time",
 		level: "senior-level",
 		salaryRange: {
 			min: 120000,

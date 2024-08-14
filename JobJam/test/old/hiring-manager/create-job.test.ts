@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { jobs } from "../../jobs";
+import { jobs } from "../../integration/jobs";
 import { create_job, login } from "./actions";
 
 test("hiring manager can create a job", async () => {
