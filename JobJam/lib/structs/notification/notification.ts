@@ -48,6 +48,7 @@ export class NotificationStruct extends Construct {
         TABLENAME: dynamoDBTable.tableName,
         FROM_EMAIL: EMAIL,
       },
+      logRetention: 7,
     });
 
     dynamoDBTable.grantReadData(notifier);
@@ -80,10 +81,10 @@ export class NotificationStruct extends Construct {
             dynamodb: {
               NewImage: {
                 pk: {
-                  S: FilterRule.beginsWith("Interview#"),
+                  S: FilterRule.beginsWith("Job#"),
                 },
                 sk: {
-                  S: FilterRule.beginsWith("Feedback#"),
+                  S: FilterRule.beginsWith("Application#"),
                 },
               },
             },
