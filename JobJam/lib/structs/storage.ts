@@ -5,6 +5,7 @@ import {
   AuthorizationType,
   AwsIntegration,
   CognitoUserPoolsAuthorizer,
+  PassthroughBehavior,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
@@ -36,32 +37,28 @@ export class StorageStruct extends Construct {
           statements: [
             new PolicyStatement({
               actions: ["s3:PutObject", "s3:GetObject"],
-              resources: [this.bucket.bucketArn],
+              resources: [`${this.bucket.bucketArn}/*`],
             }),
           ],
         }),
       },
     });
 
-    const fileResource = api.root
-      .addResource("files")
-      .addResource("{applicationId}")
-      .addResource("{key+}");
+    const fileResource = api.root.addResource("files").addResource("{key+}");
 
     fileResource.addMethod(
       "POST",
       new AwsIntegration({
         service: "s3",
         integrationHttpMethod: "PUT",
-        path: `${this.bucket.bucketName}/{applicationId}/{key}`,
+        path: `${this.bucket.bucketName}/{key}`,
         options: {
           credentialsRole,
+          passthroughBehavior: PassthroughBehavior.WHEN_NO_TEMPLATES,
           requestParameters: {
+            "integration.request.path.key": "method.request.path.key",
             "integration.request.header.Content-Type":
               "method.request.header.Content-Type",
-            "integration.request.path.key": "method.request.path.key",
-            "integration.request.path.applicationId":
-              "method.request.path.applicationId",
           },
           integrationResponses: [
             {
@@ -82,7 +79,6 @@ export class StorageStruct extends Construct {
       {
         requestParameters: {
           "method.request.path.key": true,
-          "method.request.path.applicationId": true,
           "method.request.header.Content-Type": true,
         },
         authorizationType: AuthorizationType.COGNITO,
@@ -95,13 +91,11 @@ export class StorageStruct extends Construct {
       new AwsIntegration({
         service: "s3",
         integrationHttpMethod: "GET",
-        path: `${this.bucket.bucketName}/{applicationId}/{key}`,
+        path: `${this.bucket.bucketName}/{key}`,
         options: {
           credentialsRole,
           requestParameters: {
             "integration.request.path.key": "method.request.path.key",
-            "integration.request.path.applicationId":
-              "method.request.path.applicationId",
             "integration.request.header.Content-Type":
               "method.request.header.Content-Type",
           },
@@ -124,7 +118,6 @@ export class StorageStruct extends Construct {
       {
         requestParameters: {
           "method.request.path.key": true,
-          "method.request.path.applicationId": true,
           "method.request.header.Content-Type": true,
         },
         authorizationType: AuthorizationType.COGNITO,
