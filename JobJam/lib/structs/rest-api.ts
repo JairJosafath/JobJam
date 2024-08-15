@@ -47,13 +47,16 @@ export class RestApiStruct extends Construct {
           {
             statusCode: "200",
           },
+          {
+            statusCode: "400",
+            selectionPattern: "4\\d{2}",
+          },
+          {
+            statusCode: "500",
+            selectionPattern: "5\\d{2}",
+          },
         ],
-        passthroughBehavior: PassthroughBehavior.NEVER,
-        requestTemplates: {
-          "application/json": JSON.stringify({
-            statusCode: 200,
-          }),
-        },
+        passthroughBehavior: PassthroughBehavior.WHEN_NO_TEMPLATES,
       })
     );
 

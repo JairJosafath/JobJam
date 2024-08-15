@@ -113,7 +113,7 @@ export class JobResource extends Construct {
                   },
                 },
                 HiringManagerEmail: {
-                  S: "$context.authorizer.claims.email",
+                  S: "$util.parseJson($context.authorizer.claims).email",
                 },
                 datecreated: {
                   S: "$context.requestTime",
@@ -128,12 +128,6 @@ export class JobResource extends Construct {
           integrationResponses: [
             {
               statusCode: "200",
-              selectionPattern: "2\\d{2}",
-              responseTemplates: {
-                "application/json": JSON.stringify({
-                  jobId: "$context.requestId",
-                }),
-              },
             },
             {
               selectionPattern: "4\\d{2}",

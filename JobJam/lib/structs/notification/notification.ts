@@ -40,6 +40,10 @@ export class NotificationStruct extends Construct {
       identity: Identity.email(EMAIL.replace("@", "+hiringmanager@")),
     }).applyRemovalPolicy(RemovalPolicy.DESTROY);
 
+    new EmailIdentity(this, "JobJamEmailIdentity4", {
+      identity: Identity.email(EMAIL.replace("@", "+applicant@")),
+    }).applyRemovalPolicy(RemovalPolicy.DESTROY);
+
     const notifier = new Function(this, "JobJamNotificationFunction", {
       runtime: Runtime.NODEJS_20_X,
       handler: "index.handler",
@@ -48,6 +52,7 @@ export class NotificationStruct extends Construct {
         TABLENAME: dynamoDBTable.tableName,
         FROM_EMAIL: EMAIL,
       },
+      logRetention: 7,
     });
 
     dynamoDBTable.grantReadData(notifier);
@@ -80,10 +85,10 @@ export class NotificationStruct extends Construct {
             dynamodb: {
               NewImage: {
                 pk: {
-                  S: FilterRule.beginsWith("Interview#"),
+                  S: FilterRule.beginsWith("Job#"),
                 },
                 sk: {
-                  S: FilterRule.beginsWith("Feedback#"),
+                  S: FilterRule.beginsWith("Application#"),
                 },
               },
             },
