@@ -12,14 +12,14 @@ describe("Happy Flow: Applicants can accept an offer", () => {
     const token = await login(username, password);
     expect(token).toContain("eyJ");
 
-    let applications = await listApplications(
+    const applications = await listApplications(
       "ApplicationsByApplicant",
       "ApplicantEmail",
       "",
       token
     );
 
-    if ((applications.length = 0)) {
+    if (!applications.length) {
       console.log("the apllicant has no offers");
       return;
     }

@@ -40,6 +40,10 @@ export class NotificationStruct extends Construct {
       identity: Identity.email(EMAIL.replace("@", "+hiringmanager@")),
     }).applyRemovalPolicy(RemovalPolicy.DESTROY);
 
+    new EmailIdentity(this, "JobJamEmailIdentity4", {
+      identity: Identity.email(EMAIL.replace("@", "+applicant@")),
+    }).applyRemovalPolicy(RemovalPolicy.DESTROY);
+
     const notifier = new Function(this, "JobJamNotificationFunction", {
       runtime: Runtime.NODEJS_20_X,
       handler: "index.handler",

@@ -70,15 +70,7 @@ export async function handler(event) {
   }
   // auto confirm test users
   else if (event.triggerSource === "PreSignUp_SignUp") {
-    console.log(
-      `user email: ${
-        event.request.userAttributes.email
-      }, test email: ${TEST_EMAIL}
-        includes? ${event.request.userAttributes.email.includes(
-          TEST_EMAIL.split("+")[0]
-        )}
-        `
-    );
+    event.request.userAttributes["custom:role"] = "applicant";
     if (
       ENV === "dev" &&
       event.request.userAttributes.email.includes(TEST_EMAIL.split("+")[0])

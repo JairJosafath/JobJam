@@ -248,7 +248,7 @@ export async function listApplications(
       }
     );
     const data = await res.json();
-    console.log({ token });
+    console.log({ data });
     return data.Items as any[];
   } catch (e) {
     console.error(e);
@@ -429,9 +429,7 @@ export async function acceptJobOffer(
   signedOfferPath: string,
   token: string
 ) {
-  const key = `/offers/${application.JobId.S}/${
-    application.ApplicationId.S
-  }/${crypto.randomUUID()}.pdf`;
+  const key = `/offers/offer.pdf`;
 
   try {
     const res = await fetch(ENDPOINT + "offers", {
@@ -441,8 +439,8 @@ export async function acceptJobOffer(
         Authorization: token,
       },
       body: JSON.stringify({
-        jobId: application.JobId.S,
-        applicationId: application.ApplicationId.S,
+        jobId: application.pk.S,
+        applicationId: application.sk.S,
         status: "OFFER_ACCEPTED",
         offer: key,
       }),
