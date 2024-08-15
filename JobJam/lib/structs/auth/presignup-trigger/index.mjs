@@ -55,9 +55,6 @@ export async function handler(event) {
           Email: {
             S: event.request.userAttributes.email,
           },
-          Department: {
-            S: event.request.userAttributes["custom:department"],
-          },
           Role: {
             S: role,
           },

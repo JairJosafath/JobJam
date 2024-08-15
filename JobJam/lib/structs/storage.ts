@@ -5,6 +5,7 @@ import {
   AuthorizationType,
   AwsIntegration,
   CognitoUserPoolsAuthorizer,
+  PassthroughBehavior,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
@@ -56,12 +57,13 @@ export class StorageStruct extends Construct {
         path: `${this.bucket.bucketName}/{applicationId}/{key}`,
         options: {
           credentialsRole,
+          passthroughBehavior: PassthroughBehavior.WHEN_NO_TEMPLATES,
           requestParameters: {
-            "integration.request.header.Content-Type":
-              "method.request.header.Content-Type",
             "integration.request.path.key": "method.request.path.key",
             "integration.request.path.applicationId":
               "method.request.path.applicationId",
+            "integration.request.header.Content-Type":
+              "method.request.header.Content-Type",
           },
           integrationResponses: [
             {
@@ -82,7 +84,6 @@ export class StorageStruct extends Construct {
       {
         requestParameters: {
           "method.request.path.key": true,
-          "method.request.path.applicationId": true,
           "method.request.header.Content-Type": true,
         },
         authorizationType: AuthorizationType.COGNITO,
@@ -95,7 +96,7 @@ export class StorageStruct extends Construct {
       new AwsIntegration({
         service: "s3",
         integrationHttpMethod: "GET",
-        path: `${this.bucket.bucketName}/{applicationId}/{key}`,
+        path: `${this.bucket.bucketName}/{key}`,
         options: {
           credentialsRole,
           requestParameters: {
@@ -124,7 +125,6 @@ export class StorageStruct extends Construct {
       {
         requestParameters: {
           "method.request.path.key": true,
-          "method.request.path.applicationId": true,
           "method.request.header.Content-Type": true,
         },
         authorizationType: AuthorizationType.COGNITO,
