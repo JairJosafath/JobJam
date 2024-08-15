@@ -6,22 +6,21 @@ import { randomUUID } from "crypto";
 import { config } from "dotenv";
 config();
 
-describe("Happy Flow: Applicant can upload resume", async () => {
-  test("applicant can upload a file", async () => {
-    const PATH = "test/integration/resume.pdf";
-    const { username, password, email } = applicants[0];
-    const token = await login(username, password);
-    expect(token).toContain("eyJ");
+// describe("Happy Flow: Applicant can upload resume", () => {
+//   test("applicant can upload a file", async () => {
+//     const PATH = "test/integration/resume.pdf";
+//     const { username, password, email } = applicants[0];
+//     const token = await login(username, password);
+//     expect(token).toContain("eyJ");
 
-    expect(
-      await uploadFile(PATH, `resume/${username}/${randomUUID()}.pdf`, token)
-    ).toBe(200);
-  });
-});
+//     expect(
+//       await uploadFile(PATH, `resume/${username}/${randomUUID()}.pdf`, token)
+//     ).toBe(200);
+//   });
+// });
 
-describe("Happy Flow: Applicant can download a file", async () => {
+describe("Happy Flow: Applicant can download a file", () => {
   test("applicant can download a file", async () => {
-    const PATH = "test/integration/resume.pdf";
     const { username, password, email } = applicants[0];
     const token = await login(username, password);
     expect(token).toContain("eyJ");

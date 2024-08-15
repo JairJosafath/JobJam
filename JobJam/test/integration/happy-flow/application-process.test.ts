@@ -51,7 +51,7 @@ describe("Happy Flow: users can aply for jobs and hiring managers can make decis
           "I am a very smart employee and will work very hard!",
           token
         )
-      ).resolves.toBe(200);
+      ).toBe(200);
     }
   });
 

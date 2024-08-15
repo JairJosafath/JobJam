@@ -37,7 +37,7 @@ export class StorageStruct extends Construct {
           statements: [
             new PolicyStatement({
               actions: ["s3:PutObject", "s3:GetObject"],
-              resources: [this.bucket.bucketArn],
+              resources: [`${this.bucket.bucketArn}/*`],
             }),
           ],
         }),

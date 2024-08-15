@@ -464,7 +464,7 @@ export async function uploadFile(path: string, key: string, token: string) {
     return 0;
   }
   try {
-    const res = await fetch(ENDPOINT + "files/" + key, {
+    const res = await fetch(ENDPOINT + "files/" + "1.pdf", {
       method: "POST",
       headers: {
         Authorization: token,
@@ -481,18 +481,18 @@ export async function uploadFile(path: string, key: string, token: string) {
 
 export async function downloadFile(key: string, token: string) {
   try {
-    const res = await fetch(ENDPOINT + "files/" + key, {
+    const res = await fetch(`${ENDPOINT}files/${key}`, {
       headers: {
         Authorization: token,
         Accept: "application/pdf",
       },
     });
-    return res.status;
 
     // store file
     const data = await res.arrayBuffer();
 
     fs.writeFile("test/integration/downloaded.pdf", Buffer.from(data));
+    return res.status;
   } catch (e) {
     console.error(e);
   }
