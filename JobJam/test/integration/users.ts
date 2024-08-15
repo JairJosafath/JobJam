@@ -3,6 +3,13 @@ config();
 
 export const interviewers = [
   {
+    email: process.env.EMAIL?.replace("@", "+interviewer@") || "",
+    username: process.env.USERNAME + "+interviewer",
+    password: process.env.PASSWORD || "",
+    newPassword: process.env.NEW_PASSWORD || "",
+    phone: "+1234567891",
+  },
+  {
     email: process.env.EMAIL?.replace("@", "+interviewer1@") || "",
     username: process.env.USERNAME + "+interviewer1",
     password: process.env.PASSWORD || "",
@@ -27,6 +34,13 @@ export const interviewers = [
 
 export const hiringManagers = [
   {
+    email: process.env.EMAIL?.replace("@", "+hiringmanager@") || "",
+    username: process.env.USERNAME + "+hiringmanager",
+    password: process.env.PASSWORD || "",
+    newPassword: process.env.NEW_PASSWORD || "",
+    phone: "+1234567894",
+  },
+  {
     email: process.env.EMAIL?.replace("@", "+hiringmanager1@") || "",
     username: process.env.USERNAME + "+hiringmanager1",
     password: process.env.PASSWORD || "",
@@ -50,6 +64,13 @@ export const hiringManagers = [
 ];
 
 export const applicants = [
+  {
+    email: process.env.EMAIL?.replace("@", "+applicant@") || "",
+    username: process.env.USERNAME + "+applicant",
+    password: process.env.PASSWORD || "",
+    newPassword: process.env.NEW_PASSWORD || "",
+    phone: "+1234567897",
+  },
   {
     email: process.env.EMAIL?.replace("@", "+applicant1@") || "",
     username: process.env.USERNAME + "+applicant1",

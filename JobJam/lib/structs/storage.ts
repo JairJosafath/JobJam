@@ -44,24 +44,19 @@ export class StorageStruct extends Construct {
       },
     });
 
-    const fileResource = api.root
-      .addResource("files")
-      .addResource("{applicationId}")
-      .addResource("{key+}");
+    const fileResource = api.root.addResource("files").addResource("{key+}");
 
     fileResource.addMethod(
       "POST",
       new AwsIntegration({
         service: "s3",
         integrationHttpMethod: "PUT",
-        path: `${this.bucket.bucketName}/{applicationId}/{key}`,
+        path: `${this.bucket.bucketName}/{key}`,
         options: {
           credentialsRole,
           passthroughBehavior: PassthroughBehavior.WHEN_NO_TEMPLATES,
           requestParameters: {
             "integration.request.path.key": "method.request.path.key",
-            "integration.request.path.applicationId":
-              "method.request.path.applicationId",
             "integration.request.header.Content-Type":
               "method.request.header.Content-Type",
           },
@@ -101,8 +96,6 @@ export class StorageStruct extends Construct {
           credentialsRole,
           requestParameters: {
             "integration.request.path.key": "method.request.path.key",
-            "integration.request.path.applicationId":
-              "method.request.path.applicationId",
             "integration.request.header.Content-Type":
               "method.request.header.Content-Type",
           },

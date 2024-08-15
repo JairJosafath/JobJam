@@ -8,10 +8,11 @@ import {
   CognitoIdentityProviderClient,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { config } from "dotenv";
-import * as fs from "fs";
+import * as fs_ from "fs";
 
 config();
 
+const fs = fs_.promises;
 const ENDPOINT = process.env.API_ENDPOINT || "";
 
 export async function createAdmin(
@@ -451,4 +452,49 @@ export async function acceptJobOffer(
     console.error(e);
     return 0;
   }
+}
+
+export async function uploadFile(path: string, key: string, token: string) {
+  const data = await fs.readFile(path).catch((e) => {
+    console.error(e);
+    return undefined;
+  });
+
+  if (!data) {
+    return 0;
+  }
+  try {
+    const res = await fetch(ENDPOINT + "files/" + key, {
+      method: "POST",
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/pdf",
+      },
+      body: data,
+    });
+    return res.status;
+  } catch (e) {
+    console.error(e);
+  }
+  return 0;
+}
+
+export async function downloadFile(key: string, token: string) {
+  try {
+    const res = await fetch(ENDPOINT + "files/" + key, {
+      headers: {
+        Authorization: token,
+        Accept: "application/pdf",
+      },
+    });
+    return res.status;
+
+    // store file
+    const data = await res.arrayBuffer();
+
+    fs.writeFile("test/integration/downloaded.pdf", Buffer.from(data));
+  } catch (e) {
+    console.error(e);
+  }
+  return 0;
 }
