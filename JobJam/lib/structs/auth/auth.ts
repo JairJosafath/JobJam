@@ -1,4 +1,4 @@
-import { RemovalPolicy } from "aws-cdk-lib";
+import { CfnOutput, RemovalPolicy } from "aws-cdk-lib";
 import {
   StringAttribute,
   UserPool,
@@ -68,6 +68,16 @@ export class AuthStruct extends Construct {
         userPassword: true,
         userSrp: true,
       },
+    });
+
+    this.userPool.grant(
+      this.lambdaTrigger,
+      "cognito-idp:AdminUpdateUserAttributes"
+    );
+
+    // output userpoolid
+    new CfnOutput(this, "UserPoolId", {
+      value: this.userPool.userPoolId,
     });
   }
 }
