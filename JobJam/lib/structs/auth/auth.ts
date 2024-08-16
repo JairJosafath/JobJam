@@ -1,4 +1,4 @@
-import { RemovalPolicy } from "aws-cdk-lib";
+import { CfnOutput, RemovalPolicy, TagManager } from "aws-cdk-lib";
 import {
   StringAttribute,
   UserPool,
@@ -10,6 +10,8 @@ import { Construct } from "constructs";
 import path = require("path");
 import { Function } from "aws-cdk-lib/aws-lambda";
 import { config } from "dotenv";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { Tag } from "aws-cdk-lib";
 config();
 
 export class AuthStruct extends Construct {
@@ -60,14 +62,35 @@ export class AuthStruct extends Construct {
       },
       lambdaTriggers: {
         preSignUp: this.lambdaTrigger,
+        postConfirmation: this.lambdaTrigger,
       },
     });
+
     // The client is needed to authenticate the user in the frontend, in our case that will all happen in the api gateway VTL templates
     this.clientId = this.userPool.addClient("FrontendClient", {
       authFlows: {
         userPassword: true,
         userSrp: true,
       },
+    });
+    this.lambdaTrigger.addToRolePolicy(
+      new PolicyStatement({
+        actions: ["cognito-idp:AdminUpdateUserAttributes"],
+        resources: ["*"], // I get circular dependency errors if I try to use the userpool arn here since its a test project, I will wild star it for now
+        // conditions: {
+        //   // cognito userpool is tagged with project=jobjam
+        //   // seems cognito userpool doesnt inherit tags from the stack, if you start this project just give it a userpoolname and
+        //   // modify the condition to match that
+        //   // StringEquals: {
+        //   //   "aws:ResourceTag/project": "jobjam",
+        //   // },
+        // },
+      })
+    );
+
+    // output userpoolid
+    new CfnOutput(this, "UserPoolId", {
+      value: this.userPool.userPoolId,
     });
   }
 }

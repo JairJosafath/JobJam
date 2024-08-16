@@ -452,7 +452,7 @@ export async function acceptJobOffer(
   }
 }
 
-export async function uploadFile(path: string, key: string, token: string) {
+export async function uploadFile(path: string, token: string) {
   const data = await fs.readFile(path).catch((e) => {
     console.error(e);
     return undefined;

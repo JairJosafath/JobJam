@@ -1,8 +1,8 @@
 # JobJam - Serverless Hiring System
 
 Welcome to the JobJam repository! JobJam is a serverless CMS built using AWS
-services to streamline and improve the hiring process for companies. This system
-is designed to be scalable, cost-effective, and easy to integrate with your
+services to streamline and improve the hiring process for a fictional company. This system
+is designed to be scalable, cost-effective, and easy to integrate with their
 existing frontend applications. For a detailed overview of the project, you can
 view the notion page
 [here](https://neighborly-airport-3a6.notion.site/Serverless-CMS-JamJob-v2-e6b87b25c4d84af8bd60b41e642be629?pvs=4)
@@ -122,3 +122,11 @@ the system. Below is a simplified overview of the architecture:
 5. **Set up environment variables**: Create a `.env` file in the root directory
    and add the necessary configuration (e.g., Cognito User Pool ID, etc.). you
    can use the .env.example file as a template.
+
+6. **Run the test scripts**: You can run the test scripts manually or use the npm scripts to run them.
+
+   ```bash
+   npm run test-stack
+   ```
+
+   this just runs all the tests in the order so the integration tests can run. The test makes users, and the users mimic the roles of the system. The tests are in the test folder. You should be able to verify all changes made in the aws resources.
