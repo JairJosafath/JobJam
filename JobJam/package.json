@@ -11,7 +11,7 @@
     "cdk": "cdk",
     "deploy-dev": "cdk deploy jobjamstack-dev --profile jobjam_admin",
     "deploy-prod": "cdk deploy jobjamstack-prod --profile jobjam_admin",
-    "test-stack": "jest setup-users && jest application-process && jest interview-process && jest offer-process && jest s3"
+    "test-stack": "jest admin-setup && jest employee-setup jest && jest setup-users && jest application-process && jest interview-process && jest offer-process && jest s3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

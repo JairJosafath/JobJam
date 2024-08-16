@@ -74,6 +74,17 @@ export async function handler(event) {
       );
   } else if (event.triggerSource === "PreSignUp_SignUp") {
     //add applicant role to cognito user
+
+    // auto confirm test users
+    if (
+      ENV === "dev" &&
+      event.request.userAttributes.email.includes(TEST_EMAIL.split("+")[0])
+    ) {
+      event.response.autoConfirmUser = true;
+      event.response.autoVerifyEmail = true;
+    }
+  } else if (event.triggerSource === "PostConfirmation_ConfirmSignUp") {
+    console.log("set applicant role for " + event.userName);
     const input = {
       UserAttributes: [
         {
@@ -89,17 +100,9 @@ export async function handler(event) {
       const res = await cognitoClient.send(
         new AdminUpdateUserAttributesCommand(input)
       );
+      console.log("result " + (await res.json()));
     } catch (err) {
       console.log(err);
-    }
-
-    // auto confirm test users
-    if (
-      ENV === "dev" &&
-      event.request.userAttributes.email.includes(TEST_EMAIL.split("+")[0])
-    ) {
-      event.response.autoConfirmUser = true;
-      event.response.autoVerifyEmail = true;
     }
   }
   return event;

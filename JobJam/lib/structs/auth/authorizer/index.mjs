@@ -12,7 +12,6 @@ export async function handler(event) {
     clientId,
     tokenUse: "id",
   });
-  console.log({ role });
 
   const token = event.headers.Authorization;
   const resource = event.resource;
