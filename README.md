@@ -107,7 +107,11 @@ the system. Below is a simplified overview of the architecture:
 
    ```
 
-4. **Deploy the infrastructure**:
+4. **Set up environment variables**: Create a `.env` file in the root directory
+   and add the necessary configuration (e.g., Cognito User Pool ID, etc.). you
+   can use the .env.example file as a template. You should set values for your testusers before running the deploy scripts.
+
+5. **Deploy the infrastructure**:
 
    ```bash
    cdk deploy
@@ -118,10 +122,6 @@ the system. Below is a simplified overview of the architecture:
    ```bash
    npm run deploy-dev
    ```
-
-5. **Set up environment variables**: Create a `.env` file in the root directory
-   and add the necessary configuration (e.g., Cognito User Pool ID, etc.). you
-   can use the .env.example file as a template.
 
 6. **Run the test scripts**: You can run the test scripts manually or use the npm scripts to run them.
 
