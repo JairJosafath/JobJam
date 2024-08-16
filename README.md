@@ -73,7 +73,7 @@ the system. Below is a simplified overview of the architecture:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/JairJosafath/JobJam2.0.git
+   git clone https://github.com/JairJosafath/JobJam.git
    cd JobJam
    ```
 
